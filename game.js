@@ -7,8 +7,8 @@
 
 const GAME_CONFIG = {
     tileSize: 32,
-    dungeonWidth: 50,  // tiles
-    dungeonHeight: 40, // tiles
+    dungeonWidth: 500,  // tiles (10x bigger)
+    dungeonHeight: 400, // tiles (10x bigger)
     viewportWidth: 800,
     viewportHeight: 600,
     enemiesPerLevel: 15,
@@ -55,7 +55,7 @@ const ITEM_TYPES = {
     },
     boots: {
         slot: 'boots',
-        baseStats: { defense: 3, speed: 2 },
+        baseStats: { defense: 3, speed: 0.3 },
         icon: '👢',
         names: ['Boots', 'Greaves', 'Sandals', 'Treads', 'Sabatons', 'Shoes']
     },
@@ -158,7 +158,7 @@ const MONSTER_TYPES = [
     {
         name: 'Rat',
         icon: '🐀',
-        color: '#8b4513',
+        color: '#2a1a0a',  // Darker brown
         baseHp: 20,
         baseDamage: 3,
         baseExp: 10,
@@ -173,7 +173,7 @@ const MONSTER_TYPES = [
     {
         name: 'Slime',
         icon: '🟢',
-        color: '#32cd32',
+        color: '#0a3a0a',  // Dark sickly green
         baseHp: 30,
         baseDamage: 5,
         baseExp: 15,
@@ -188,7 +188,7 @@ const MONSTER_TYPES = [
     {
         name: 'Goblin',
         icon: '👺',
-        color: '#228b22',
+        color: '#0a2a0a',  // Dark forest green
         baseHp: 50,
         baseDamage: 8,
         baseExp: 25,
@@ -203,7 +203,7 @@ const MONSTER_TYPES = [
     {
         name: 'Skeleton',
         icon: '💀',
-        color: '#f5f5dc',
+        color: '#3a3a3a',  // Dark gray bones
         baseHp: 60,
         baseDamage: 10,
         baseExp: 35,
@@ -218,7 +218,7 @@ const MONSTER_TYPES = [
     {
         name: 'Orc',
         icon: '👹',
-        color: '#556b2f',
+        color: '#1a2a1a',  // Dark olive
         baseHp: 100,
         baseDamage: 15,
         baseExp: 50,
@@ -233,7 +233,7 @@ const MONSTER_TYPES = [
     {
         name: 'Dark Mage',
         icon: '🧙',
-        color: '#4b0082',
+        color: '#1a0030',  // Darker purple
         baseHp: 70,
         baseDamage: 20,
         baseExp: 60,
@@ -248,7 +248,7 @@ const MONSTER_TYPES = [
     {
         name: 'Troll',
         icon: '👾',
-        color: '#708090',
+        color: '#2a2a3a',  // Dark slate
         baseHp: 150,
         baseDamage: 18,
         baseExp: 80,
@@ -263,7 +263,7 @@ const MONSTER_TYPES = [
     {
         name: 'Demon',
         icon: '😈',
-        color: '#8b0000',
+        color: '#3a0000',  // Darker blood red
         baseHp: 200,
         baseDamage: 25,
         baseExp: 120,
@@ -278,7 +278,7 @@ const MONSTER_TYPES = [
     {
         name: 'Dragon Whelp',
         icon: '🐉',
-        color: '#ff4500',
+        color: '#4a1500',  // Dark fire orange
         baseHp: 300,
         baseDamage: 35,
         baseExp: 200,
@@ -293,7 +293,7 @@ const MONSTER_TYPES = [
     {
         name: 'Elder Dragon',
         icon: '🐲',
-        color: '#800080',
+        color: '#2a0030',  // Dark violet
         baseHp: 500,
         baseDamage: 50,
         baseExp: 400,
@@ -312,7 +312,7 @@ const BOSS_TYPES = [
     {
         name: 'Goblin King',
         icon: '👺',
-        color: '#006400',
+        color: '#002000',  // Very dark green
         baseHp: 200,
         baseDamage: 15,
         baseExp: 150,
@@ -328,7 +328,7 @@ const BOSS_TYPES = [
     {
         name: 'Skeleton Lord',
         icon: '💀',
-        color: '#daa520',
+        color: '#2a2010',  // Dark bone color
         baseHp: 400,
         baseDamage: 25,
         baseExp: 300,
@@ -344,7 +344,7 @@ const BOSS_TYPES = [
     {
         name: 'Demon Lord',
         icon: '😈',
-        color: '#8b0000',
+        color: '#200000',  // Very dark blood red
         baseHp: 700,
         baseDamage: 40,
         baseExp: 500,
@@ -360,7 +360,7 @@ const BOSS_TYPES = [
     {
         name: 'Ancient Dragon',
         icon: '🐲',
-        color: '#4b0082',
+        color: '#100020',  // Dark purple/black
         baseHp: 1200,
         baseDamage: 60,
         baseExp: 1000,
@@ -873,7 +873,11 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
         const numBonuses = rarity === 'rare' ? 1 : rarity === 'epic' ? 2 : rarity === 'legendary' ? 3 : 4;
         for (let i = 0; i < numBonuses; i++) {
             const bonusStat = randomChoice(bonusStats);
-            const bonusValue = Math.floor(randomRange(3, 10) * rarityData.statMultiplier * levelScale);
+            // Speed bonuses are much smaller to keep movement balanced
+            const baseBonus = bonusStat === 'speed' ? randomFloat(0.1, 0.5) : randomRange(3, 10);
+            const bonusValue = bonusStat === 'speed' 
+                ? Math.round(baseBonus * rarityData.statMultiplier * levelScale * 10) / 10
+                : Math.floor(baseBonus * rarityData.statMultiplier * levelScale);
             stats[bonusStat] = (stats[bonusStat] || 0) + bonusValue;
         }
     }
@@ -1270,6 +1274,58 @@ function updateParticles() {
 // MONSTER SPRITE RENDERING
 // ============================================
 
+// Helper function to draw a scary smile
+function drawScarySmile(ctx, size, yOffset, smileWidth = 0.2, smileColor = '#ff0000') {
+    ctx.save();
+    // Draw evil smile curve
+    ctx.strokeStyle = smileColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, yOffset, size * smileWidth, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+    // Draw teeth
+    ctx.fillStyle = '#ffffff';
+    const teethCount = 5;
+    const teethWidth = size * smileWidth * 2 / teethCount;
+    for (let i = 0; i < teethCount; i++) {
+        if (i % 2 === 0) {
+            ctx.beginPath();
+            ctx.moveTo(-size * smileWidth + i * teethWidth + teethWidth * 0.2, yOffset - size * 0.02);
+            ctx.lineTo(-size * smileWidth + i * teethWidth + teethWidth * 0.5, yOffset + size * 0.08);
+            ctx.lineTo(-size * smileWidth + i * teethWidth + teethWidth * 0.8, yOffset - size * 0.02);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+    ctx.restore();
+}
+
+// Helper function to draw glowing red eyes
+function drawGlowingEyes(ctx, size, leftX, rightX, y, eyeSize = 0.08) {
+    // Glow effect
+    ctx.save();
+    ctx.shadowColor = '#ff0000';
+    ctx.shadowBlur = 8;
+    // Eyes
+    ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.arc(leftX, y, size * eyeSize, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(rightX, y, size * eyeSize, 0, Math.PI * 2);
+    ctx.fill();
+    // Pupils
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(leftX, y, size * eyeSize * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(rightX, y, size * eyeSize * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
 function renderMonsterSprite(ctx, monster, screenX, screenY) {
     const animOffset = monster.animFrame === 1 ? 2 : 0;
     const size = monster.size;
@@ -1278,6 +1334,10 @@ function renderMonsterSprite(ctx, monster, screenX, screenY) {
     
     ctx.save();
     ctx.translate(screenX, screenY - animOffset);
+    
+    // Dark aura effect for all monsters - more intense for bosses
+    ctx.shadowColor = '#3a0020';
+    ctx.shadowBlur = isBoss ? 25 : 10;
     
     // Boss glow effect
     if (isBoss) {
@@ -1347,8 +1407,8 @@ function drawRatSprite(ctx, size, color) {
     ctx.arc(size * 0.6, -size * 0.35, size * 0.15, 0, Math.PI * 2);
     ctx.fill();
     
-    // Inner ears
-    ctx.fillStyle = '#ffcccc';
+    // Inner ears - dark
+    ctx.fillStyle = '#1a0010';
     ctx.beginPath();
     ctx.arc(size * 0.4, -size * 0.4, size * 0.08, 0, Math.PI * 2);
     ctx.fill();
@@ -1356,21 +1416,14 @@ function drawRatSprite(ctx, size, color) {
     ctx.arc(size * 0.6, -size * 0.35, size * 0.08, 0, Math.PI * 2);
     ctx.fill();
     
-    // Eyes
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(size * 0.55, -size * 0.15, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ff3333';
-    ctx.beginPath();
-    ctx.arc(size * 0.55, -size * 0.15, size * 0.04, 0, Math.PI * 2);
-    ctx.fill();
+    // Glowing red eyes
+    drawGlowingEyes(ctx, size, size * 0.45, size * 0.65, -size * 0.15, 0.06);
     
-    // Nose
-    ctx.fillStyle = '#ff6b6b';
-    ctx.beginPath();
-    ctx.arc(size * 0.75, 0, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
+    // Scary smile with teeth
+    ctx.save();
+    ctx.translate(size * 0.55, 0);
+    drawScarySmile(ctx, size, size * 0.05, 0.15, '#ff3333');
+    ctx.restore();
     
     // Tail
     ctx.strokeStyle = color;
@@ -1397,36 +1450,17 @@ function drawSlimeSprite(ctx, size, color, animFrame) {
     ctx.ellipse(0, size * 0.1, size * (1 + squish), size * (0.8 - squish), 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Highlight/shine
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    // Dark highlight/shine
+    ctx.fillStyle = 'rgba(0, 50, 0, 0.4)';
     ctx.beginPath();
     ctx.ellipse(-size * 0.3, -size * 0.2, size * 0.25, size * 0.15, -0.5, 0, Math.PI * 2);
     ctx.fill();
     
-    // Eyes
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.ellipse(-size * 0.25, -size * 0.1, size * 0.15, size * 0.2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(size * 0.25, -size * 0.1, size * 0.15, size * 0.2, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Glowing red eyes
+    drawGlowingEyes(ctx, size, -size * 0.25, size * 0.25, -size * 0.1, 0.1);
     
-    // Pupils
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(-size * 0.25, -size * 0.05, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(size * 0.25, -size * 0.05, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Mouth
-    ctx.strokeStyle = '#006400';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(0, size * 0.2, size * 0.2, 0.2, Math.PI - 0.2);
-    ctx.stroke();
+    // Scary smile
+    drawScarySmile(ctx, size, size * 0.25, 0.25, '#ff0000');
 }
 
 function drawGoblinSprite(ctx, size, color, isBoss) {
@@ -1457,37 +1491,17 @@ function drawGoblinSprite(ctx, size, color, isBoss) {
     ctx.closePath();
     ctx.fill();
     
-    // Eyes
-    ctx.fillStyle = '#ffff00';
-    ctx.beginPath();
-    ctx.arc(-size * 0.15 * scale, -size * 0.25 * scale, size * 0.1 * scale, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(size * 0.15 * scale, -size * 0.25 * scale, size * 0.1 * scale, 0, Math.PI * 2);
-    ctx.fill();
+    // Glowing red eyes
+    drawGlowingEyes(ctx, size * scale, -size * 0.15 * scale, size * 0.15 * scale, -size * 0.25 * scale, 0.1);
     
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(-size * 0.15 * scale, -size * 0.25 * scale, size * 0.05 * scale, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(size * 0.15 * scale, -size * 0.25 * scale, size * 0.05 * scale, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Nose
-    ctx.fillStyle = '#4a7a4a';
+    // Nose - dark
+    ctx.fillStyle = '#0a1a0a';
     ctx.beginPath();
     ctx.arc(0, -size * 0.1 * scale, size * 0.08 * scale, 0, Math.PI * 2);
     ctx.fill();
     
-    // Mouth with teeth
-    ctx.fillStyle = '#2a2a2a';
-    ctx.beginPath();
-    ctx.arc(0, size * 0.05 * scale, size * 0.15 * scale, 0, Math.PI);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(-size * 0.08 * scale, -size * 0.02 * scale, size * 0.06 * scale, size * 0.08 * scale);
-    ctx.fillRect(size * 0.02 * scale, -size * 0.02 * scale, size * 0.06 * scale, size * 0.08 * scale);
+    // Scary smile with teeth
+    drawScarySmile(ctx, size * scale, size * 0.02 * scale, 0.18, '#ff3333');
     
     // Arms
     ctx.fillStyle = color;
@@ -1498,9 +1512,9 @@ function drawGoblinSprite(ctx, size, color, isBoss) {
     ctx.fillRect(-size * 0.3 * scale, size * 0.45 * scale, size * 0.2 * scale, size * 0.3 * scale);
     ctx.fillRect(size * 0.1 * scale, size * 0.45 * scale, size * 0.2 * scale, size * 0.3 * scale);
     
-    // Boss crown
+    // Boss crown - dark gold
     if (isBoss) {
-        ctx.fillStyle = '#ffd700';
+        ctx.fillStyle = '#8a6c00';
         ctx.beginPath();
         ctx.moveTo(-size * 0.3, -size * 0.6);
         ctx.lineTo(-size * 0.2, -size * 0.8);
@@ -1515,7 +1529,7 @@ function drawGoblinSprite(ctx, size, color, isBoss) {
 }
 
 function drawSkeletonSprite(ctx, size, color, isBoss) {
-    const boneColor = isBoss ? '#ffd700' : color;
+    const boneColor = isBoss ? '#4a3a10' : color;
     
     // Ribcage/torso
     ctx.strokeStyle = boneColor;
@@ -1548,6 +1562,9 @@ function drawSkeletonSprite(ctx, size, color, isBoss) {
     ctx.fill();
     
     // Red glowing eyes
+    ctx.save();
+    ctx.shadowColor = '#ff0000';
+    ctx.shadowBlur = 10;
     ctx.fillStyle = '#ff0000';
     ctx.beginPath();
     ctx.arc(-size * 0.12, -size * 0.5, size * 0.05, 0, Math.PI * 2);
@@ -1555,6 +1572,7 @@ function drawSkeletonSprite(ctx, size, color, isBoss) {
     ctx.beginPath();
     ctx.arc(size * 0.12, -size * 0.5, size * 0.05, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
     
     // Nose hole
     ctx.fillStyle = '#000';
@@ -1565,13 +1583,16 @@ function drawSkeletonSprite(ctx, size, color, isBoss) {
     ctx.closePath();
     ctx.fill();
     
-    // Jaw/teeth
+    // Scary grinning teeth
     ctx.fillStyle = boneColor;
     ctx.beginPath();
     ctx.arc(0, -size * 0.2, size * 0.2, 0, Math.PI);
     ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.fillRect(-size * 0.15, -size * 0.22, size * 0.3, size * 0.04);
+    // Draw individual teeth
+    ctx.fillStyle = '#1a1a1a';
+    for (let i = 0; i < 6; i++) {
+        ctx.fillRect(-size * 0.15 + i * size * 0.05, -size * 0.22, size * 0.02, size * 0.08);
+    }
     
     // Arms (bones)
     ctx.strokeStyle = boneColor;
@@ -1597,9 +1618,9 @@ function drawSkeletonSprite(ctx, size, color, isBoss) {
     ctx.lineTo(size * 0.15, size * 0.7);
     ctx.stroke();
     
-    // Boss crown
+    // Boss crown - dark
     if (isBoss) {
-        ctx.fillStyle = '#8b0000';
+        ctx.fillStyle = '#3a0000';
         ctx.beginPath();
         ctx.moveTo(-size * 0.25, -size * 0.75);
         ctx.lineTo(-size * 0.15, -size * 0.95);
@@ -1623,23 +1644,17 @@ function drawOrcSprite(ctx, size, color) {
     ctx.arc(0, -size * 0.35, size * 0.4, 0, Math.PI * 2);
     ctx.fill();
     
-    // Brow ridge
-    ctx.fillStyle = '#3a5a2f';
+    // Brow ridge - darker
+    ctx.fillStyle = '#0a1a0a';
     ctx.beginPath();
     ctx.ellipse(0, -size * 0.45, size * 0.35, size * 0.1, 0, Math.PI, Math.PI * 2);
     ctx.fill();
     
-    // Eyes
-    ctx.fillStyle = '#ff0000';
-    ctx.beginPath();
-    ctx.arc(-size * 0.15, -size * 0.35, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(size * 0.15, -size * 0.35, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
+    // Glowing red eyes
+    drawGlowingEyes(ctx, size, -size * 0.15, size * 0.15, -size * 0.35, 0.08);
     
-    // Tusks
-    ctx.fillStyle = '#f5f5dc';
+    // Tusks - yellowed
+    ctx.fillStyle = '#8a8a6a';
     ctx.beginPath();
     ctx.moveTo(-size * 0.2, -size * 0.1);
     ctx.lineTo(-size * 0.25, -size * 0.35);
@@ -1653,11 +1668,8 @@ function drawOrcSprite(ctx, size, color) {
     ctx.closePath();
     ctx.fill();
     
-    // Mouth
-    ctx.fillStyle = '#2a2a2a';
-    ctx.beginPath();
-    ctx.arc(0, -size * 0.15, size * 0.12, 0, Math.PI);
-    ctx.fill();
+    // Scary smile
+    drawScarySmile(ctx, size, -size * 0.12, 0.15, '#ff3333');
     
     // Muscular arms
     ctx.fillStyle = color;
@@ -1693,12 +1705,15 @@ function drawMageSprite(ctx, size, color) {
     ctx.fill();
     
     // Face (shadowed)
-    ctx.fillStyle = '#1a1a2e';
+    ctx.fillStyle = '#0a0a15';
     ctx.beginPath();
     ctx.arc(0, -size * 0.15, size * 0.2, 0, Math.PI * 2);
     ctx.fill();
     
-    // Glowing eyes
+    // Glowing purple-red eyes
+    ctx.save();
+    ctx.shadowColor = '#ff00ff';
+    ctx.shadowBlur = 10;
     ctx.fillStyle = '#ff00ff';
     ctx.beginPath();
     ctx.arc(-size * 0.08, -size * 0.2, size * 0.05, 0, Math.PI * 2);
@@ -1706,27 +1721,31 @@ function drawMageSprite(ctx, size, color) {
     ctx.beginPath();
     ctx.arc(size * 0.08, -size * 0.2, size * 0.05, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
     
-    // Staff
-    ctx.strokeStyle = '#5c3d2e';
+    // Scary smile in the darkness
+    drawScarySmile(ctx, size, -size * 0.02, 0.12, '#ff3333');
+    
+    // Staff - dark wood
+    ctx.strokeStyle = '#2a1a0a';
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(size * 0.5, -size * 0.5);
     ctx.lineTo(size * 0.5, size * 0.6);
     ctx.stroke();
     
-    // Staff orb
-    ctx.fillStyle = '#9932cc';
+    // Staff orb - dark purple
+    ctx.save();
+    ctx.shadowColor = '#9932cc';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#4a1066';
     ctx.beginPath();
     ctx.arc(size * 0.5, -size * 0.6, size * 0.15, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.beginPath();
-    ctx.arc(size * 0.45, -size * 0.65, size * 0.05, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.restore();
     
-    // Hands
-    ctx.fillStyle = '#9090a0';
+    // Hands - gray/dead
+    ctx.fillStyle = '#3a3a4a';
     ctx.beginPath();
     ctx.arc(-size * 0.3, size * 0.2, size * 0.1, 0, Math.PI * 2);
     ctx.fill();
@@ -1744,8 +1763,8 @@ function drawTrollSprite(ctx, size, color) {
     ctx.arc(0, -size * 0.4, size * 0.35, 0, Math.PI * 2);
     ctx.fill();
     
-    // Warts/bumps
-    ctx.fillStyle = '#5a6a5a';
+    // Warts/bumps - darker
+    ctx.fillStyle = '#1a2a2a';
     ctx.beginPath();
     ctx.arc(-size * 0.2, -size * 0.35, size * 0.08, 0, Math.PI * 2);
     ctx.fill();
@@ -1756,26 +1775,17 @@ function drawTrollSprite(ctx, size, color) {
     ctx.arc(-size * 0.4, size * 0.3, size * 0.07, 0, Math.PI * 2);
     ctx.fill();
     
-    // Eyes (small and beady)
-    ctx.fillStyle = '#ffff00';
-    ctx.beginPath();
-    ctx.arc(-size * 0.1, -size * 0.45, size * 0.06, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(size * 0.1, -size * 0.45, size * 0.06, 0, Math.PI * 2);
-    ctx.fill();
+    // Glowing eyes (small and beady)
+    drawGlowingEyes(ctx, size, -size * 0.1, size * 0.1, -size * 0.45, 0.06);
     
-    // Big nose
-    ctx.fillStyle = '#5a7a5a';
+    // Big nose - darker
+    ctx.fillStyle = '#1a2a2a';
     ctx.beginPath();
     ctx.ellipse(0, -size * 0.3, size * 0.12, size * 0.15, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Mouth
-    ctx.fillStyle = '#2a2a2a';
-    ctx.beginPath();
-    ctx.arc(0, -size * 0.15, size * 0.15, 0.2, Math.PI - 0.2);
-    ctx.fill();
+    // Scary smile
+    drawScarySmile(ctx, size, -size * 0.12, 0.18, '#ff3333');
     
     // Thick arms
     ctx.fillStyle = color;
@@ -1786,8 +1796,8 @@ function drawTrollSprite(ctx, size, color) {
     ctx.ellipse(size * 0.65, size * 0.15, size * 0.25, size * 0.4, -0.2, 0, Math.PI * 2);
     ctx.fill();
     
-    // Hands (clubs)
-    ctx.fillStyle = '#4a5a4a';
+    // Hands (clubs) - darker
+    ctx.fillStyle = '#1a2a2a';
     ctx.beginPath();
     ctx.arc(-size * 0.7, size * 0.5, size * 0.15, 0, Math.PI * 2);
     ctx.fill();
@@ -1815,8 +1825,8 @@ function drawDemonSprite(ctx, size, color, isBoss) {
     ctx.arc(0, -size * 0.3 * scale, size * 0.35 * scale, 0, Math.PI * 2);
     ctx.fill();
     
-    // Horns
-    ctx.fillStyle = '#2a0a0a';
+    // Horns - darker
+    ctx.fillStyle = '#0a0000';
     ctx.beginPath();
     ctx.moveTo(-size * 0.25 * scale, -size * 0.5 * scale);
     ctx.quadraticCurveTo(-size * 0.5 * scale, -size * 0.9 * scale, -size * 0.35 * scale, -size * 0.95 * scale);
@@ -1830,24 +1840,14 @@ function drawDemonSprite(ctx, size, color, isBoss) {
     ctx.closePath();
     ctx.fill();
     
-    // Eyes (glowing)
-    ctx.fillStyle = '#ffff00';
-    ctx.beginPath();
-    ctx.ellipse(-size * 0.12 * scale, -size * 0.35 * scale, size * 0.08 * scale, size * 0.1 * scale, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(size * 0.12 * scale, -size * 0.35 * scale, size * 0.08 * scale, size * 0.1 * scale, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Glowing eyes
+    drawGlowingEyes(ctx, size * scale, -size * 0.12 * scale, size * 0.12 * scale, -size * 0.35 * scale, 0.1);
     
-    // Evil smile
-    ctx.strokeStyle = '#ffff00';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(0, -size * 0.15 * scale, size * 0.15 * scale, 0.3, Math.PI - 0.3);
-    ctx.stroke();
+    // Evil smile with teeth
+    drawScarySmile(ctx, size * scale, -size * 0.12 * scale, 0.18, '#ffff00');
     
-    // Wings
-    ctx.fillStyle = '#4a0a0a';
+    // Wings - darker
+    ctx.fillStyle = '#1a0000';
     ctx.beginPath();
     ctx.moveTo(-size * 0.4 * scale, -size * 0.1 * scale);
     ctx.quadraticCurveTo(-size * 0.9 * scale, -size * 0.5 * scale, -size * 0.8 * scale, size * 0.1 * scale);
@@ -1870,7 +1870,7 @@ function drawDemonSprite(ctx, size, color, isBoss) {
     ctx.stroke();
     
     // Tail point
-    ctx.fillStyle = '#2a0a0a';
+    ctx.fillStyle = '#0a0000';
     ctx.beginPath();
     ctx.moveTo(size * 0.2 * scale, size * 0.85 * scale);
     ctx.lineTo(size * 0.35 * scale, size * 0.95 * scale);
@@ -1878,10 +1878,10 @@ function drawDemonSprite(ctx, size, color, isBoss) {
     ctx.closePath();
     ctx.fill();
     
-    // Boss aura
+    // Boss aura - darker red
     if (isBoss) {
-        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(200, 0, 0, 0.7)';
+        ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.arc(0, 0, size * 1.1, 0, Math.PI * 2);
         ctx.stroke();
@@ -1907,8 +1907,8 @@ function drawDragonSprite(ctx, size, color, isBoss) {
     ctx.ellipse(size * 0.55 * scale, -size * 0.5 * scale, size * 0.2 * scale, size * 0.15 * scale, -0.4, 0, Math.PI * 2);
     ctx.fill();
     
-    // Nostrils with smoke
-    ctx.fillStyle = '#2a0a0a';
+    // Nostrils with smoke - darker
+    ctx.fillStyle = '#0a0000';
     ctx.beginPath();
     ctx.arc(size * 0.65 * scale, -size * 0.55 * scale, size * 0.04 * scale, 0, Math.PI * 2);
     ctx.fill();
@@ -1916,18 +1916,22 @@ function drawDragonSprite(ctx, size, color, isBoss) {
     ctx.arc(size * 0.65 * scale, -size * 0.45 * scale, size * 0.04 * scale, 0, Math.PI * 2);
     ctx.fill();
     
-    // Eye
-    ctx.fillStyle = '#ffff00';
+    // Glowing eye
+    ctx.save();
+    ctx.shadowColor = '#ff0000';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#ff0000';
     ctx.beginPath();
     ctx.ellipse(size * 0.4 * scale, -size * 0.45 * scale, size * 0.08 * scale, size * 0.1 * scale, 0, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
     ctx.fillStyle = '#000';
     ctx.beginPath();
     ctx.ellipse(size * 0.42 * scale, -size * 0.45 * scale, size * 0.03 * scale, size * 0.06 * scale, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Horns/spikes on head
-    ctx.fillStyle = darkenColor(color, 0.5);
+    // Horns/spikes on head - darker
+    ctx.fillStyle = '#0a0005';
     for (let i = 0; i < 3; i++) {
         ctx.beginPath();
         ctx.moveTo(size * (0.15 + i * 0.15) * scale, -size * (0.5 + i * 0.05) * scale);
@@ -1937,8 +1941,15 @@ function drawDragonSprite(ctx, size, color, isBoss) {
         ctx.fill();
     }
     
-    // Wings
-    ctx.fillStyle = darkenColor(color, 0.7);
+    // Dragon smile with teeth
+    ctx.save();
+    ctx.translate(size * 0.5 * scale, -size * 0.35 * scale);
+    ctx.rotate(-0.3);
+    drawScarySmile(ctx, size * scale, size * 0.02 * scale, 0.12, '#ff3333');
+    ctx.restore();
+    
+    // Wings - darker
+    ctx.fillStyle = darkenColor(color, 0.5);
     ctx.beginPath();
     ctx.moveTo(-size * 0.3 * scale, -size * 0.2 * scale);
     ctx.quadraticCurveTo(-size * scale, -size * 0.8 * scale, -size * 0.7 * scale, size * 0.1 * scale);
@@ -1961,8 +1972,8 @@ function drawDragonSprite(ctx, size, color, isBoss) {
     ctx.fillRect(-size * 0.35 * scale, size * 0.4 * scale, size * 0.2 * scale, size * 0.3 * scale);
     ctx.fillRect(size * 0.15 * scale, size * 0.4 * scale, size * 0.2 * scale, size * 0.3 * scale);
     
-    // Claws
-    ctx.fillStyle = '#2a2a2a';
+    // Claws - dark
+    ctx.fillStyle = '#0a0a0a';
     for (let i = 0; i < 3; i++) {
         ctx.beginPath();
         ctx.moveTo(-size * 0.35 * scale + i * size * 0.08 * scale, size * 0.7 * scale);
@@ -1988,8 +1999,8 @@ function drawDragonSprite(ctx, size, color, isBoss) {
     ctx.closePath();
     ctx.fill();
     
-    // Tail spikes
-    ctx.fillStyle = darkenColor(color, 0.5);
+    // Tail spikes - darker
+    ctx.fillStyle = '#0a0005';
     ctx.beginPath();
     ctx.moveTo(-size * 0.85 * scale, size * 0.25 * scale);
     ctx.lineTo(-size * scale, size * 0.2 * scale);
@@ -1997,10 +2008,10 @@ function drawDragonSprite(ctx, size, color, isBoss) {
     ctx.closePath();
     ctx.fill();
     
-    // Boss aura and crown
+    // Boss aura - darker purple
     if (isBoss) {
-        ctx.strokeStyle = 'rgba(148, 0, 211, 0.6)';
-        ctx.lineWidth = 4;
+        ctx.strokeStyle = 'rgba(80, 0, 100, 0.8)';
+        ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.arc(0, 0, size * 1.2, 0, Math.PI * 2);
         ctx.stroke();
@@ -2008,7 +2019,7 @@ function drawDragonSprite(ctx, size, color, isBoss) {
 }
 
 function drawGenericMonsterSprite(ctx, size, color) {
-    // Generic humanoid monster
+    // Generic humanoid monster - dark and scary
     ctx.fillStyle = color;
     
     // Body
@@ -2021,14 +2032,11 @@ function drawGenericMonsterSprite(ctx, size, color) {
     ctx.arc(0, -size * 0.4, size * 0.3, 0, Math.PI * 2);
     ctx.fill();
     
-    // Eyes
-    ctx.fillStyle = '#ff0000';
-    ctx.beginPath();
-    ctx.arc(-size * 0.1, -size * 0.45, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(size * 0.1, -size * 0.45, size * 0.08, 0, Math.PI * 2);
-    ctx.fill();
+    // Glowing red eyes
+    drawGlowingEyes(ctx, size, -size * 0.1, size * 0.1, -size * 0.45, 0.08);
+    
+    // Scary smile
+    drawScarySmile(ctx, size, -size * 0.25, 0.15, '#ff3333');
     
     // Arms
     ctx.fillStyle = color;
