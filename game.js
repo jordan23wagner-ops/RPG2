@@ -3977,16 +3977,15 @@ function updateInventoryUI() {
     const countEl = document.getElementById('inventory-count');
     if (countEl) countEl.textContent = `(${itemCount}/${gameState.maxInventory})`;
 
-    // Update materials count
-    updateMaterialsUI();
+    // materials UI removed temporarily
 }
 
 function updateMaterialsUI() {
     const grid = document.getElementById('materials-backpack-grid');
-    const materialCount = Object.keys(gameState.craftingMaterials).length;
-    document.getElementById('materials-count').textContent = `(${materialCount})`;
-    
-    if (!grid) return;
+    const countEl = document.getElementById('materials-count');
+    const materialCount = Object.keys(gameState.craftingMaterials || {}).length;
+    if (countEl) countEl.textContent = `(${materialCount})`;
+    if (!grid) return; // no UI present, nothing to render
     
     grid.innerHTML = '';
     const materialEntries = Object.entries(gameState.craftingMaterials);
@@ -4012,22 +4011,9 @@ function updateMaterialsUI() {
 }
 
 function switchInventoryTab(tab) {
+    // Materials tab removed; default to items only. No-op for tab switching.
     const itemsTab = document.getElementById('inventory-items-tab');
-    const materialsTab = document.getElementById('inventory-materials-tab');
-    const tabs = document.querySelectorAll('.inventory-tab');
-    
-    tabs.forEach(t => t.classList.remove('active'));
-    
-    if (tab === 'items') {
-        itemsTab.style.display = 'block';
-        materialsTab.style.display = 'none';
-        tabs[0].classList.add('active');
-    } else {
-        itemsTab.style.display = 'none';
-        materialsTab.style.display = 'block';
-        tabs[1].classList.add('active');
-        updateMaterialsUI(); // Refresh materials when switching to tab
-    }
+    if (itemsTab) itemsTab.style.display = 'block';
 }
 
 function updateEquipmentUI() {
