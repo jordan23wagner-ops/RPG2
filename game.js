@@ -271,6 +271,7 @@ const gameState = {
     spawnInterval: 3000,
     maxMonsters: 10,
     gameTime: 0,
+    regenTimer: 0,
     isPaused: false
 };
 
@@ -385,8 +386,9 @@ function generatePotion() {
 function spawnMonster() {
     if (gameState.monsters.length >= gameState.maxMonsters) return;
     
-    // Select monster based on player level
-    const availableMonsters = MONSTER_TYPES.filter((m, index) => index <= Math.floor(gameState.player.level / 2) + 2);
+    // Select monster based on player level (capped at max available)
+    const maxIndex = Math.min(Math.floor(gameState.player.level / 2) + 2, MONSTER_TYPES.length - 1);
+    const availableMonsters = MONSTER_TYPES.filter((m, index) => index <= maxIndex);
     const monsterType = randomChoice(availableMonsters);
     
     // Scale monster stats with player level
@@ -402,6 +404,9 @@ function spawnMonster() {
         case 3: x = -30; y = randomRange(50, canvas.height - 50); break;
     }
     
+    const goldMin = Math.floor(monsterType.baseGold[0] * levelScale);
+    const goldMax = Math.floor(monsterType.baseGold[1] * levelScale);
+    
     gameState.monsters.push({
         id: Date.now() + Math.random(),
         ...monsterType,
@@ -411,7 +416,7 @@ function spawnMonster() {
         maxHp: Math.floor(monsterType.baseHp * levelScale),
         damage: Math.floor(monsterType.baseDamage * levelScale),
         exp: Math.floor(monsterType.baseExp * levelScale),
-        gold: randomRange(...monsterType.baseGold.map(g => Math.floor(g * levelScale))),
+        gold: randomRange(goldMin, goldMax),
         lastAttack: 0,
         attackCooldown: 1000
     });
@@ -905,12 +910,14 @@ function updateInventoryUI() {
 }
 
 function updateEquipmentUI() {
+    const rarityClasses = Object.keys(RARITIES).map(r => `rarity-${r}`);
+    
     for (const [slot, item] of Object.entries(gameState.player.equipment)) {
         const slotElement = document.getElementById(`slot-${slot}`);
         if (!slotElement) continue;
         
-        // Remove all rarity classes
-        slotElement.classList.remove('equipped', 'rarity-common', 'rarity-uncommon', 'rarity-rare', 'rarity-epic', 'rarity-legendary', 'rarity-mythic');
+        // Remove all rarity classes dynamically
+        slotElement.classList.remove('equipped', ...rarityClasses);
         
         const iconElement = slotElement.querySelector('.slot-icon');
         
@@ -975,12 +982,21 @@ function showTooltip(item, event) {
     rarityEl.textContent = RARITIES[item.rarity].name;
     rarityEl.style.color = RARITIES[item.rarity].color;
     
+    // Stat name lookup for proper display
+    const statDisplayNames = {
+        attack: 'Attack',
+        defense: 'Defense',
+        maxHp: 'Max HP',
+        maxMana: 'Max Mana',
+        speed: 'Speed'
+    };
+    
     statsEl.innerHTML = '';
     if (item.stats) {
         for (const [stat, value] of Object.entries(item.stats)) {
             const statEl = document.createElement('div');
             statEl.className = 'tooltip-stat positive';
-            const statName = stat.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+            const statName = statDisplayNames[stat] || stat.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
             statEl.textContent = `+${value} ${statName}`;
             statsEl.appendChild(statEl);
         }
@@ -1104,7 +1120,7 @@ function update(deltaTime) {
     
     gameState.gameTime += deltaTime;
     
-    // Update cooldowns
+    // Update cooldowns (deltaTime is in seconds, cooldown is in ms)
     if (gameState.player.attackCooldown > 0) {
         gameState.player.attackCooldown -= deltaTime * 1000;
     }
@@ -1155,8 +1171,10 @@ function update(deltaTime) {
     // Update particles
     updateParticles();
     
-    // HP/Mana regeneration
-    if (gameState.gameTime % 60 < deltaTime) { // Every ~60 frames
+    // HP/Mana regeneration (every 1 second)
+    gameState.regenTimer += deltaTime;
+    if (gameState.regenTimer >= 1.0) {
+        gameState.regenTimer = 0;
         if (p.hp < p.maxHp) p.hp = Math.min(p.maxHp, p.hp + 1);
         if (p.mana < p.maxMana) p.mana = Math.min(p.maxMana, p.mana + 0.5);
     }
