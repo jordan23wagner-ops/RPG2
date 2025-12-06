@@ -13,7 +13,14 @@ const GAME_CONFIG = {
     viewportHeight: 600,
     enemiesPerLevel: 30, // Doubled from 15
     bossEveryNLevels: 3,
-    corridorWidth: 3 // Wider corridors (in tiles)
+    corridorWidth: 3, // Wider corridors (in tiles)
+    // Diablo-inspired feature configuration
+    championSpawnChance: 0.2, // 20% chance for affixed enemies
+    healthGlobeDropChance: 0.5, // 50% chance on enemy death
+    healthGlobeLifetimeMs: 30000, // 30 seconds before despawn
+    corpsFadeTimeMs: 10000, // 10 seconds to fade
+    deathAnimationDurationMs: 300, // 300ms fade out
+    ambientParticleSpawnChance: 0.3 // 30% chance per frame
 };
 
 // Speed bonus ranges for item generation
@@ -721,7 +728,7 @@ function spawnDungeonEnemies() {
             // DIABLO FEATURE 9: Random affix chance (20% for champions)
             let affix = null;
             let affixMultiplier = 1.0;
-            if (Math.random() < 0.2 && level >= 2) {
+            if (Math.random() < GAME_CONFIG.championSpawnChance && level >= 2) {
                 affix = randomChoice(ENEMY_AFFIXES);
                 affixMultiplier = affix.hpMultiplier;
             }
@@ -1140,7 +1147,7 @@ function killMonster(monster) {
     }
     
     // DIABLO FEATURE 6: Health globe drops (50% chance)
-    if (Math.random() < 0.5) {
+    if (Math.random() < GAME_CONFIG.healthGlobeDropChance) {
         gameState.healthGlobes.push({
             x: monster.x + randomRange(-15, 15),
             y: monster.y + randomRange(-15, 15),
@@ -1175,7 +1182,7 @@ function killMonster(monster) {
         }
         gameState.dungeon.enemiesRemaining = gameState.monsters.length;
         updateUI();
-    }, 300);
+    }, GAME_CONFIG.deathAnimationDurationMs);
 }
 
 // DIABLO FEATURE 1: Blood splatter
@@ -3087,14 +3094,14 @@ function update(deltaTime) {
                     createParticles(globe.x, globe.y, '#ff0000', 10);
                 }
                 gameState.healthGlobes.splice(i, 1);
-            } else if (Date.now() - globe.createdTime > 30000) {
-                // Remove old globes after 30 seconds
+            } else if (Date.now() - globe.createdTime > GAME_CONFIG.healthGlobeLifetimeMs) {
+                // Remove old globes after configured lifetime
                 gameState.healthGlobes.splice(i, 1);
             }
         }
         
         // DIABLO FEATURE 3: Ambient dark particles (fog/embers)
-        if (Math.random() < 0.3) {
+        if (Math.random() < GAME_CONFIG.ambientParticleSpawnChance) {
             const spawnX = p.worldX + randomRange(-400, 400);
             const spawnY = p.worldY + randomRange(-300, 300);
             gameState.ambientParticles.push({
@@ -3109,11 +3116,11 @@ function update(deltaTime) {
             });
         }
         
-        // Clean up old corpses (fade after 10 seconds)
+        // Clean up old corpses (fade after configured time)
         gameState.corpses = gameState.corpses.filter(corpse => {
             const age = Date.now() - corpse.fadeTime;
-            if (age > 10000) return false;
-            corpse.alpha = 0.6 * (1 - age / 10000);
+            if (age > GAME_CONFIG.corpsFadeTimeMs) return false;
+            corpse.alpha = 0.6 * (1 - age / GAME_CONFIG.corpsFadeTimeMs);
             return true;
         });
         
@@ -3445,7 +3452,7 @@ function renderDungeon() {
         // DIABLO FEATURE 10: Death animation fade
         if (monster.dying) {
             const elapsed = Date.now() - monster.deathTime;
-            monster.deathAlpha = Math.max(0, 1 - elapsed / 300);
+            monster.deathAlpha = Math.max(0, 1 - elapsed / GAME_CONFIG.deathAnimationDurationMs);
             ctx.globalAlpha = monster.deathAlpha;
         }
         
