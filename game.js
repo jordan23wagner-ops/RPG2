@@ -4154,6 +4154,7 @@ function setupInventoryEventHandlers() {
     
     // Use event delegation - single listener on the grid instead of each slot
     inventoryGrid.addEventListener('click', handleInventoryGridClick);
+    // Use capture phase for mouse events to handle tooltips on child elements
     inventoryGrid.addEventListener('mouseenter', handleInventoryGridMouseEnter, true);
     inventoryGrid.addEventListener('mouseleave', handleInventoryGridMouseLeave, true);
 }
@@ -4209,8 +4210,15 @@ function handleInventoryGridMouseLeave(event) {
     hideTooltip();
 }
 
-// Initialize inventory event handlers
-setupInventoryEventHandlers();
+// Initialize inventory event handlers when DOM is ready
+// Note: Scripts are loaded at end of body, so DOM should already be ready,
+// but we check to be safe
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupInventoryEventHandlers);
+} else {
+    // DOM is already ready
+    setupInventoryEventHandlers();
+}
 
 // ============================================
 // TOOLTIP SYSTEM
