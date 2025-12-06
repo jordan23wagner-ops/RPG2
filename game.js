@@ -2045,10 +2045,17 @@ function darkenColor(color, factor) {
     // Convert hex to RGB, darken, convert back
     let r, g, b;
     if (color.startsWith('#')) {
-        const hex = color.slice(1);
-        r = parseInt(hex.substr(0, 2), 16);
-        g = parseInt(hex.substr(2, 2), 16);
-        b = parseInt(hex.substr(4, 2), 16);
+        let hex = color.slice(1);
+        // Support both 3-character and 6-character hex colors
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        if (hex.length !== 6) {
+            return color; // Invalid hex, return as-is
+        }
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
     } else {
         return color; // Return as-is if not hex
     }
@@ -3200,7 +3207,8 @@ function renderPlayer(screenX, screenY) {
     // Body/Torso (tunic/shirt)
     ctx.fillStyle = shirtColor;
     ctx.beginPath();
-    ctx.roundRect(-10, -12, 20, 20, 3);
+    // Use fillRect as roundRect has limited browser support
+    ctx.fillRect(-10, -12, 20, 20);
     ctx.fill();
     
     // Belt
