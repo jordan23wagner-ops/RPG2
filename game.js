@@ -7,12 +7,21 @@
 
 const GAME_CONFIG = {
     tileSize: 32,
-    dungeonWidth: 500,  // tiles (10x bigger)
-    dungeonHeight: 400, // tiles (10x bigger)
+    dungeonWidth: 100,  // tiles - smaller for shorter distances
+    dungeonHeight: 80,  // tiles - smaller for shorter distances
     viewportWidth: 800,
     viewportHeight: 600,
     enemiesPerLevel: 30, // Doubled from 15
-    bossEveryNLevels: 3
+    bossEveryNLevels: 3,
+    corridorWidth: 3, // Wider corridors (in tiles)
+    // Diablo-inspired feature configuration
+    championSpawnChance: 0.2, // 20% chance for affixed enemies
+    healthGlobeDropChance: 0.5, // 50% chance on enemy death
+    healthGlobeLifetimeMs: 30000, // 30 seconds before despawn
+    corpseFadeTimeMs: 10000, // 10 seconds to fade
+    deathAnimationDurationMs: 300, // 300ms fade out
+    ambientParticleSpawnChance: 0.3, // 30% chance per frame
+    potionDropReduction: 0.5 // Reduce potion drops by 50% since we have health globes
 };
 
 // Speed bonus ranges for item generation
@@ -157,6 +166,28 @@ const SHOP_UPGRADES = {
         icon: '🧪'
     }
 };
+
+// ============================================
+// DIABLO-INSPIRED FEATURES
+// ============================================
+
+// Elemental damage types
+const ELEMENT_TYPES = {
+    fire: { name: 'Fire', color: '#ff6600', damageBonus: 1.2 },
+    ice: { name: 'Ice', color: '#00ccff', damageBonus: 1.1, slow: 0.5 },
+    poison: { name: 'Poison', color: '#00ff00', damageBonus: 1.0, dot: 5 },
+    lightning: { name: 'Lightning', color: '#ffff00', damageBonus: 1.3, chain: 2 }
+};
+
+// Enemy affixes (like Diablo's champion/rare modifiers)
+const ENEMY_AFFIXES = [
+    { name: 'Frozen', color: '#00ccff', effect: 'freeze', hpMultiplier: 1.3 },
+    { name: 'Molten', color: '#ff6600', effect: 'fire', hpMultiplier: 1.4 },
+    { name: 'Arcane', color: '#a335ee', effect: 'arcane', hpMultiplier: 1.5 },
+    { name: 'Vampiric', color: '#8b0000', effect: 'lifesteal', hpMultiplier: 1.3 },
+    { name: 'Fast', color: '#ffff00', effect: 'speed', hpMultiplier: 1.2 },
+    { name: 'Shielded', color: '#4da6ff', effect: 'shield', hpMultiplier: 1.6 }
+];
 
 // ============================================
 // MONSTER DEFINITIONS
@@ -493,7 +524,12 @@ const gameState = {
     gameTime: 0,
     regenTimer: 0,
     isPaused: false,
-    showShop: false
+    showShop: false,
+    // Diablo-inspired features
+    corpses: [], // Persistent corpses on ground
+    healthGlobes: [], // Health pickups
+    ambientParticles: [], // Dark fog/embers
+    screenShake: { active: false, intensity: 0, duration: 0 }
 };
 
 // ============================================
@@ -534,6 +570,20 @@ function randomChoice(array) {
 
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
+}
+
+function darkenColor(color, factor) {
+    // Parse hex color and darken it
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    const newR = Math.floor(r * factor);
+    const newG = Math.floor(g * factor);
+    const newB = Math.floor(b * factor);
+    
+    return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
 }
 
 // ============================================
@@ -584,7 +634,8 @@ function generateDungeon(level) {
         }
     }
     
-    // Connect rooms with corridors
+    // Connect rooms with corridors (wider corridors)
+    const corridorWidth = GAME_CONFIG.corridorWidth;
     for (let i = 1; i < rooms.length; i++) {
         const r1 = rooms[i - 1];
         const r2 = rooms[i];
@@ -593,20 +644,40 @@ function generateDungeon(level) {
         const x2 = Math.floor(r2.x + r2.w / 2);
         const y2 = Math.floor(r2.y + r2.h / 2);
         
-        // Horizontal then vertical
+        // Horizontal then vertical with wider corridors
         if (Math.random() < 0.5) {
+            // Horizontal corridor
             for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
-                tiles[y1][x] = 0;
+                for (let w = -Math.floor(corridorWidth / 2); w <= Math.floor(corridorWidth / 2); w++) {
+                    if (y1 + w >= 0 && y1 + w < height) {
+                        tiles[y1 + w][x] = 0;
+                    }
+                }
             }
+            // Vertical corridor
             for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
-                tiles[y][x2] = 0;
+                for (let w = -Math.floor(corridorWidth / 2); w <= Math.floor(corridorWidth / 2); w++) {
+                    if (x2 + w >= 0 && x2 + w < width) {
+                        tiles[y][x2 + w] = 0;
+                    }
+                }
             }
         } else {
+            // Vertical corridor
             for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
-                tiles[y][x1] = 0;
+                for (let w = -Math.floor(corridorWidth / 2); w <= Math.floor(corridorWidth / 2); w++) {
+                    if (x1 + w >= 0 && x1 + w < width) {
+                        tiles[y][x1 + w] = 0;
+                    }
+                }
             }
+            // Horizontal corridor
             for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
-                tiles[y2][x] = 0;
+                for (let w = -Math.floor(corridorWidth / 2); w <= Math.floor(corridorWidth / 2); w++) {
+                    if (y2 + w >= 0 && y2 + w < height) {
+                        tiles[y2 + w][x] = 0;
+                    }
+                }
             }
         }
     }
@@ -655,20 +726,29 @@ function spawnDungeonEnemies() {
             const goldMin = Math.floor(monsterType.baseGold[0] * levelScale);
             const goldMax = Math.floor(monsterType.baseGold[1] * levelScale);
             
+            // DIABLO FEATURE 9: Random affix chance (20% for champions)
+            let affix = null;
+            let affixMultiplier = 1.0;
+            if (Math.random() < GAME_CONFIG.championSpawnChance && level >= 2) {
+                affix = randomChoice(ENEMY_AFFIXES);
+                affixMultiplier = affix.hpMultiplier;
+            }
+            
             gameState.monsters.push({
                 id: Date.now() + Math.random(),
                 ...monsterType,
                 x: x,
                 y: y,
-                hp: Math.floor(monsterType.baseHp * levelScale),
-                maxHp: Math.floor(monsterType.baseHp * levelScale),
+                hp: Math.floor(monsterType.baseHp * levelScale * affixMultiplier),
+                maxHp: Math.floor(monsterType.baseHp * levelScale * affixMultiplier),
                 damage: Math.floor(monsterType.baseDamage * levelScale),
-                exp: Math.floor(monsterType.baseExp * levelScale),
+                exp: Math.floor(monsterType.baseExp * levelScale * affixMultiplier),
                 gold: randomRange(goldMin, goldMax),
                 lastAttack: 0,
                 attackCooldown: 1000,
                 animFrame: 0,
-                animTimer: 0
+                animTimer: 0,
+                affix: affix // Champion modifier
             });
         }
     }
@@ -723,6 +803,11 @@ function enterTown() {
     gameState.player.hp = gameState.player.maxHp; // Full heal in town
     gameState.camera.x = 0;
     gameState.camera.y = 0;
+    
+    // Hide minimap in town
+    const minimapContainer = document.getElementById('minimap-container');
+    if (minimapContainer) minimapContainer.style.display = 'none';
+    
     addMessage('Welcome to town! Visit the shop to spend your gold.', 'system');
     updateUI();
 }
@@ -1029,15 +1114,32 @@ function killMonster(monster) {
     gameState.player.gold += monster.gold;
     
     const isBoss = monster.isBoss;
+    const affixName = monster.affix ? monster.affix.name + ' ' : '';
     if (isBoss) {
-        addMessage(`BOSS DEFEATED! ${monster.name} vanquished! +${monster.exp} XP, +${monster.gold} Gold`, 'levelup');
+        addMessage(`BOSS DEFEATED! ${affixName}${monster.name} vanquished! +${monster.exp} XP, +${monster.gold} Gold`, 'levelup');
         gameState.dungeon.bossDefeated = true;
+        // Screen shake on boss death
+        triggerScreenShake(15, 500);
     } else {
-        addMessage(`${monster.name} defeated! +${monster.exp} XP, +${monster.gold} Gold`, 'loot');
+        addMessage(`${affixName}${monster.name} defeated! +${monster.exp} XP, +${monster.gold} Gold`, 'loot');
     }
     
     // Check for level up
     checkLevelUp();
+    
+    // DIABLO FEATURE 1: Blood splatter effects
+    createBloodSplatter(monster.x, monster.y, 20);
+    
+    // DIABLO FEATURE 4: Persistent corpse
+    gameState.corpses.push({
+        x: monster.x,
+        y: monster.y,
+        icon: monster.icon,
+        color: darkenColor(monster.color, 0.5),
+        size: monster.size,
+        alpha: 0.6,
+        fadeTime: Date.now()
+    });
     
     // Drop loot - bosses have guaranteed drops
     if (Math.random() < monster.lootChance || isBoss) {
@@ -1045,8 +1147,18 @@ function killMonster(monster) {
         dropLoot(monster.x, monster.y, guaranteedRarity);
     }
     
-    // Drop health potion (instant pickup)
-    if (Math.random() < (monster.potionDropChance || 0.3)) {
+    // DIABLO FEATURE 6: Health globe drops (50% chance)
+    if (Math.random() < GAME_CONFIG.healthGlobeDropChance) {
+        gameState.healthGlobes.push({
+            x: monster.x + randomRange(-15, 15),
+            y: monster.y + randomRange(-15, 15),
+            healAmount: 30,
+            createdTime: Date.now()
+        });
+    }
+    
+    // Drop health potion (instant pickup) - reduced chance since we have health globes
+    if (Math.random() < (monster.potionDropChance || 0.3) * GAME_CONFIG.potionDropReduction) {
         // Auto-pickup potion if space available
         if (gameState.potions.health < gameState.potions.maxHealth) {
             gameState.potions.health++;
@@ -1055,27 +1167,66 @@ function killMonster(monster) {
         }
     }
     
+    // DIABLO FEATURE 10: Death animation with fade
+    monster.dying = true;
+    monster.deathTime = Date.now();
+    monster.deathAlpha = 1.0;
+    
     // Create death particles
     createParticles(monster.x, monster.y, monster.color, 15);
     
-    // Remove monster
-    const index = gameState.monsters.indexOf(monster);
-    if (index > -1) {
-        gameState.monsters.splice(index, 1);
+    // Remove monster after brief delay for death animation
+    // Store the monster ID to safely remove it later
+    const monsterId = monster.id;
+    setTimeout(() => {
+        const index = gameState.monsters.findIndex(m => m.id === monsterId);
+        if (index > -1) {
+            gameState.monsters.splice(index, 1);
+            gameState.dungeon.enemiesRemaining = gameState.monsters.length;
+            updateUI();
+        }
+    }, GAME_CONFIG.deathAnimationDurationMs);
+}
+
+// DIABLO FEATURE 1: Blood splatter
+function createBloodSplatter(x, y, count) {
+    for (let i = 0; i < count; i++) {
+        gameState.particles.push({
+            x: x,
+            y: y,
+            vx: randomFloat(-5, 5),
+            vy: randomFloat(-5, 5),
+            color: '#8b0000',
+            life: 1,
+            decay: randomFloat(0.01, 0.03),
+            size: randomRange(2, 6)
+        });
     }
-    
-    gameState.dungeon.enemiesRemaining = gameState.monsters.length;
-    
-    updateUI();
+}
+
+// DIABLO FEATURE 2: Screen shake
+function triggerScreenShake(intensity, duration) {
+    gameState.screenShake.active = true;
+    gameState.screenShake.intensity = intensity;
+    gameState.screenShake.duration = duration;
+    gameState.screenShake.startTime = Date.now();
 }
 
 function dropLoot(x, y, guaranteedRarity = null) {
     const item = generateItem(null, guaranteedRarity, gameState.dungeonLevel);
-    gameState.loot.push({
+    const lootItem = {
         ...item,
         x: x + randomRange(-20, 20),
         y: y + randomRange(-20, 20)
-    });
+    };
+    
+    // DIABLO FEATURE 5: Rare item beam effect for epic+ items
+    if (item.rarity === 'epic' || item.rarity === 'legendary' || item.rarity === 'mythic') {
+        lootItem.hasBeam = true;
+        lootItem.beamColor = RARITIES[item.rarity].color;
+    }
+    
+    gameState.loot.push(lootItem);
     addMessage(`${item.name} dropped!`, 'loot');
     showLootPanel();
 }
@@ -2932,21 +3083,96 @@ function update(deltaTime) {
     // Update loot panel visibility
     showLootPanel();
     
+    // DIABLO FEATURE 6: Health globe pickup
+    if (gameState.currentLocation === 'dungeon') {
+        for (let i = gameState.healthGlobes.length - 1; i >= 0; i--) {
+            const globe = gameState.healthGlobes[i];
+            const dist = distance(p.worldX, p.worldY, globe.x, globe.y);
+            if (dist < 40) {
+                // Pick up globe
+                const healAmount = Math.min(globe.healAmount, p.maxHp - p.hp);
+                p.hp += healAmount;
+                if (healAmount > 0) {
+                    addMessage(`+${healAmount} HP from Health Globe!`, 'heal');
+                    createParticles(globe.x, globe.y, '#ff0000', 10);
+                }
+                gameState.healthGlobes.splice(i, 1);
+            } else if (Date.now() - globe.createdTime > GAME_CONFIG.healthGlobeLifetimeMs) {
+                // Remove old globes after configured lifetime
+                gameState.healthGlobes.splice(i, 1);
+            }
+        }
+        
+        // DIABLO FEATURE 3: Ambient dark particles (fog/embers)
+        if (Math.random() < GAME_CONFIG.ambientParticleSpawnChance) {
+            const spawnX = p.worldX + randomRange(-400, 400);
+            const spawnY = p.worldY + randomRange(-300, 300);
+            gameState.ambientParticles.push({
+                x: spawnX,
+                y: spawnY,
+                vx: randomFloat(-0.5, 0.5),
+                vy: randomFloat(-1, -0.3),
+                color: randomChoice(['#1a1a2a', '#2a1a1a', '#ff4500']),
+                life: randomFloat(0.3, 0.8),
+                decay: randomFloat(0.002, 0.005),
+                size: randomRange(3, 8)
+            });
+        }
+        
+        // Clean up old corpses (fade after configured time)
+        gameState.corpses = gameState.corpses.filter(corpse => {
+            const age = Date.now() - corpse.fadeTime;
+            if (age > GAME_CONFIG.corpseFadeTimeMs) return false;
+            corpse.alpha = 0.6 * (1 - age / GAME_CONFIG.corpseFadeTimeMs);
+            return true;
+        });
+        
+        // Update ambient particles
+        gameState.ambientParticles = gameState.ambientParticles.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= p.decay;
+            return p.life > 0;
+        });
+    }
+    
+    // Update screen shake
+    if (gameState.screenShake.active) {
+        const elapsed = Date.now() - gameState.screenShake.startTime;
+        if (elapsed > gameState.screenShake.duration) {
+            gameState.screenShake.active = false;
+        }
+    }
+    
     // Update UI
     updateUI();
     updateShopUI();
 }
 
 function render() {
+    // DIABLO FEATURE 2: Apply screen shake
+    let shakeX = 0, shakeY = 0;
+    if (gameState.screenShake.active) {
+        const progress = (Date.now() - gameState.screenShake.startTime) / gameState.screenShake.duration;
+        const intensity = gameState.screenShake.intensity * (1 - progress);
+        shakeX = randomFloat(-intensity, intensity);
+        shakeY = randomFloat(-intensity, intensity);
+    }
+    
     // Clear canvas
-    ctx.fillStyle = '#0a0a15';
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
     
     if (gameState.currentLocation === 'town') {
         renderTown();
     } else {
         renderDungeon();
     }
+    
+    ctx.restore();
     
     // Draw particles (screen space)
     for (const particle of gameState.particles) {
@@ -2974,44 +3200,54 @@ function render() {
     
     // Draw HUD overlay
     renderHUD();
+    
+    // Draw minimap
+    if (gameState.currentLocation === 'dungeon') {
+        renderMinimap();
+    }
 }
 
 function renderTown() {
     const p = gameState.player;
     
-    // Draw town background - grass
-    ctx.fillStyle = '#2d5a27';
+    // Draw town background - darker, desolate grass
+    ctx.fillStyle = '#1a2a1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw stone path pattern
-    ctx.fillStyle = '#5a5a5a';
+    // Draw stone path pattern - darker stones
+    ctx.fillStyle = '#2a2a2a';
     ctx.fillRect(350, 0, 100, canvas.height);
     ctx.fillRect(0, 250, canvas.width, 100);
     
     // Draw buildings/structures
-    // Shop building
-    ctx.fillStyle = '#8b4513';
+    // Shop building - darker wood
+    ctx.fillStyle = '#3a2010';
     ctx.fillRect(320, 80, 160, 100);
-    ctx.fillStyle = '#654321';
+    ctx.fillStyle = '#2a1510';
     ctx.fillRect(380, 140, 40, 40); // door
-    ctx.fillStyle = '#c9a227';
+    ctx.fillStyle = '#c92727';
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('🏪 SHOP', 400, 60);
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#888';
     ctx.font = '12px Arial';
     ctx.fillText('Press E to open', 400, 200);
     
-    // Dungeon entrance
-    ctx.fillStyle = '#1a1a1a';
+    // Dungeon entrance - darker, more ominous
+    ctx.fillStyle = '#0a0a0a';
     ctx.beginPath();
     ctx.arc(gameState.town.dungeonEntranceX, gameState.town.dungeonEntranceY, 50, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#4a4a4a';
-    ctx.lineWidth = 4;
-    ctx.stroke();
     
-    ctx.fillStyle = '#ff6b6b';
+    // Red glowing border
+    ctx.strokeStyle = '#8b0000';
+    ctx.lineWidth = 4;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#ff0000';
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    
+    ctx.fillStyle = '#ff0000';
     ctx.font = 'bold 14px Arial';
     ctx.fillText('⚔️ DUNGEON', gameState.town.dungeonEntranceX, gameState.town.dungeonEntranceY - 70);
     ctx.fillStyle = '#fff';
@@ -3072,49 +3308,102 @@ function renderDungeon() {
             const screenY = y * tileSize - camY;
             
             if (tile === 1) {
-                // Wall
-                ctx.fillStyle = '#2a2a3a';
+                // Wall - much darker
+                ctx.fillStyle = '#0a0a0a';
                 ctx.fillRect(screenX, screenY, tileSize, tileSize);
-                ctx.strokeStyle = '#1a1a2a';
+                ctx.strokeStyle = '#050505';
                 ctx.lineWidth = 1;
                 ctx.strokeRect(screenX, screenY, tileSize, tileSize);
             } else if (tile === 0) {
-                // Floor
-                ctx.fillStyle = '#3a3a4a';
+                // Floor - dark stone
+                ctx.fillStyle = '#1a1a1a';
                 ctx.fillRect(screenX, screenY, tileSize, tileSize);
                 // Add some floor detail
                 if ((x + y) % 3 === 0) {
-                    ctx.fillStyle = '#353545';
+                    ctx.fillStyle = '#151515';
                     ctx.fillRect(screenX + 2, screenY + 2, tileSize - 4, tileSize - 4);
                 }
             } else if (tile === 2) {
-                // Entrance (stairs up)
-                ctx.fillStyle = '#3a5a3a';
+                // Entrance (stairs up) - green tint
+                ctx.fillStyle = '#1a2a1a';
                 ctx.fillRect(screenX, screenY, tileSize, tileSize);
                 // Draw door/portal sprite
-                ctx.fillStyle = '#5c3d2e';
+                ctx.fillStyle = '#2a1510';
                 ctx.fillRect(screenX + 8, screenY + 4, tileSize - 16, tileSize - 8);
-                ctx.fillStyle = '#3a2515';
+                ctx.fillStyle = '#1a0a05';
                 ctx.fillRect(screenX + 10, screenY + 6, tileSize - 20, tileSize - 12);
-                ctx.fillStyle = '#ffd700';
+                ctx.fillStyle = '#32cd32';
                 ctx.beginPath();
                 ctx.arc(screenX + tileSize - 12, screenY + tileSize / 2, 3, 0, Math.PI * 2);
                 ctx.fill();
             } else if (tile === 3) {
-                // Exit (stairs down)
-                ctx.fillStyle = '#5a3a3a';
+                // Exit (stairs down) - red tint
+                ctx.fillStyle = '#2a0a0a';
                 ctx.fillRect(screenX, screenY, tileSize, tileSize);
                 // Draw stairs sprite
-                ctx.fillStyle = '#4a4a5a';
+                ctx.fillStyle = '#1a1a1a';
                 for (let step = 0; step < 4; step++) {
                     ctx.fillRect(screenX + 4 + step * 3, screenY + 4 + step * 6, tileSize - 8 - step * 6, 6);
                 }
-                ctx.strokeStyle = '#3a3a4a';
+                ctx.strokeStyle = '#0a0a0a';
                 ctx.lineWidth = 1;
                 for (let step = 0; step < 4; step++) {
                     ctx.strokeRect(screenX + 4 + step * 3, screenY + 4 + step * 6, tileSize - 8 - step * 6, 6);
                 }
             }
+        }
+    }
+    
+    // DIABLO FEATURE 3: Draw ambient particles (fog/embers) - behind everything
+    for (const particle of gameState.ambientParticles) {
+        const screenX = particle.x - camX;
+        const screenY = particle.y - camY;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, particle.size * particle.life, 0, Math.PI * 2);
+        ctx.fillStyle = particle.color;
+        ctx.globalAlpha = particle.life * 0.3;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+    
+    // DIABLO FEATURE 4: Draw corpses
+    for (const corpse of gameState.corpses) {
+        const screenX = corpse.x - camX;
+        const screenY = corpse.y - camY;
+        ctx.save();
+        ctx.globalAlpha = corpse.alpha;
+        ctx.font = `${corpse.size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = corpse.color;
+        ctx.fillText(corpse.icon, screenX, screenY);
+        ctx.restore();
+    }
+    
+    // DIABLO FEATURE 5: Draw item beams for rare loot
+    for (const item of gameState.loot) {
+        if (item.hasBeam) {
+            const screenX = item.x - camX;
+            const screenY = item.y - camY;
+            
+            // Draw light beam from sky
+            ctx.save();
+            const gradient = ctx.createLinearGradient(screenX, screenY - 200, screenX, screenY);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+            gradient.addColorStop(0.5, item.beamColor + '80');
+            gradient.addColorStop(1, item.beamColor + 'cc');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(screenX - 15, screenY - 200, 30, 200);
+            
+            // Pulsing glow
+            const pulseSize = 30 + Math.sin(Date.now() / 200) * 5;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = item.beamColor;
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, pulseSize, 0, Math.PI * 2);
+            ctx.fillStyle = item.beamColor + '30';
+            ctx.fill();
+            ctx.restore();
         }
     }
     
@@ -3127,6 +3416,33 @@ function renderDungeon() {
         renderItemSprite(ctx, item, screenX, screenY, 20);
     }
     
+    // DIABLO FEATURE 6: Draw health globes
+    for (const globe of gameState.healthGlobes) {
+        const screenX = globe.x - camX;
+        const screenY = globe.y - camY;
+        
+        // Pulsing red globe
+        const pulseSize = 12 + Math.sin(Date.now() / 150) * 2;
+        ctx.save();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, pulseSize, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, pulseSize);
+        gradient.addColorStop(0, '#ff6666');
+        gradient.addColorStop(0.5, '#ff0000');
+        gradient.addColorStop(1, '#880000');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        ctx.restore();
+        
+        // White highlight
+        ctx.beginPath();
+        ctx.arc(screenX - 3, screenY - 3, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.fill();
+    }
+    
     // Draw monsters
     for (const monster of gameState.monsters) {
         const screenX = monster.x - camX;
@@ -3136,8 +3452,17 @@ function renderDungeon() {
         if (screenX < -50 || screenX > canvas.width + 50 || 
             screenY < -50 || screenY > canvas.height + 50) continue;
         
+        // DIABLO FEATURE 10: Death animation fade
+        if (monster.dying) {
+            const elapsed = Date.now() - monster.deathTime;
+            monster.deathAlpha = Math.max(0, 1 - elapsed / GAME_CONFIG.deathAnimationDurationMs);
+            ctx.globalAlpha = monster.deathAlpha;
+        }
+        
         // Draw monster sprite
         renderMonsterSprite(ctx, monster, screenX, screenY);
+        
+        ctx.globalAlpha = 1;
         
         // Health bar
         const hpPercent = monster.hp / monster.maxHp;
@@ -3154,9 +3479,18 @@ function renderDungeon() {
         ctx.lineWidth = 1;
         ctx.strokeRect(barX, barY, barWidth, barHeight);
         
-        // Monster name (with BOSS indicator)
+        // Monster name (with BOSS and AFFIX indicators)
         ctx.font = monster.isBoss ? 'bold 14px Arial' : '12px Arial';
-        ctx.fillStyle = monster.isBoss ? '#ffd700' : '#fff';
+        ctx.textAlign = 'center';
+        
+        // Show affix in different color
+        if (monster.affix) {
+            ctx.fillStyle = monster.affix.color;
+            const affixText = `[${monster.affix.name}]`;
+            ctx.fillText(affixText, screenX, barY - 20);
+            ctx.fillStyle = monster.isBoss ? '#ffd700' : '#fff';
+        }
+        
         const bossIndicator = monster.isBoss ? '[BOSS] ' : '';
         ctx.fillText(bossIndicator + monster.name, screenX, barY - 8);
     }
@@ -3412,6 +3746,96 @@ function renderPlayer(screenX, screenY) {
         
         ctx.restore();
     }
+}
+
+function renderMinimap() {
+    const minimapCanvas = document.getElementById('minimap-canvas');
+    const minimapContainer = document.getElementById('minimap-container');
+    if (!minimapCanvas || !minimapContainer) return;
+    
+    // Show minimap in dungeon
+    minimapContainer.style.display = 'block';
+    
+    const minimapCtx = minimapCanvas.getContext('2d');
+    const dungeonWidth = gameState.dungeon.width;
+    const dungeonHeight = gameState.dungeon.height;
+    const scaleX = minimapCanvas.width / dungeonWidth;
+    const scaleY = minimapCanvas.height / dungeonHeight;
+    
+    // Clear minimap
+    minimapCtx.fillStyle = '#000';
+    minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+    
+    // Draw dungeon tiles
+    const tiles = gameState.dungeon.tiles;
+    for (let y = 0; y < tiles.length; y++) {
+        for (let x = 0; x < tiles[y].length; x++) {
+            const tile = tiles[y][x];
+            const minimapX = x * scaleX;
+            const minimapY = y * scaleY;
+            
+            if (tile === 1) {
+                // Wall - dark gray
+                minimapCtx.fillStyle = '#1a1a2a';
+            } else if (tile === 0) {
+                // Floor - lighter gray
+                minimapCtx.fillStyle = '#3a3a4a';
+            } else if (tile === 2) {
+                // Entrance - green
+                minimapCtx.fillStyle = '#32cd32';
+            } else if (tile === 3) {
+                // Exit - gold
+                minimapCtx.fillStyle = '#c9a227';
+            }
+            
+            minimapCtx.fillRect(minimapX, minimapY, scaleX, scaleY);
+        }
+    }
+    
+    // Draw enemies as red dots
+    for (const monster of gameState.monsters) {
+        const monsterTileX = Math.floor(monster.x / GAME_CONFIG.tileSize);
+        const monsterTileY = Math.floor(monster.y / GAME_CONFIG.tileSize);
+        minimapCtx.fillStyle = monster.isBoss ? '#ff0000' : '#ff6b6b';
+        minimapCtx.beginPath();
+        minimapCtx.arc(
+            monsterTileX * scaleX,
+            monsterTileY * scaleY,
+            monster.isBoss ? 3 : 1.5,
+            0,
+            Math.PI * 2
+        );
+        minimapCtx.fill();
+    }
+    
+    // Draw player as bright dot
+    const playerTileX = Math.floor(gameState.player.worldX / GAME_CONFIG.tileSize);
+    const playerTileY = Math.floor(gameState.player.worldY / GAME_CONFIG.tileSize);
+    minimapCtx.fillStyle = '#fff';
+    minimapCtx.beginPath();
+    minimapCtx.arc(
+        playerTileX * scaleX,
+        playerTileY * scaleY,
+        2,
+        0,
+        Math.PI * 2
+    );
+    minimapCtx.fill();
+    
+    // Player direction indicator
+    minimapCtx.strokeStyle = '#fff';
+    minimapCtx.lineWidth = 1;
+    minimapCtx.beginPath();
+    const dirX = playerTileX * scaleX;
+    const dirY = playerTileY * scaleY;
+    let dx = 0, dy = 0;
+    if (gameState.player.direction === 'up') dy = -4;
+    else if (gameState.player.direction === 'down') dy = 4;
+    else if (gameState.player.direction === 'left') dx = -4;
+    else if (gameState.player.direction === 'right') dx = 4;
+    minimapCtx.moveTo(dirX, dirY);
+    minimapCtx.lineTo(dirX + dx, dirY + dy);
+    minimapCtx.stroke();
 }
 
 function renderHUD() {
