@@ -18,9 +18,10 @@ const GAME_CONFIG = {
     championSpawnChance: 0.2, // 20% chance for affixed enemies
     healthGlobeDropChance: 0.5, // 50% chance on enemy death
     healthGlobeLifetimeMs: 30000, // 30 seconds before despawn
-    corpsFadeTimeMs: 10000, // 10 seconds to fade
+    corpseFadeTimeMs: 10000, // 10 seconds to fade
     deathAnimationDurationMs: 300, // 300ms fade out
-    ambientParticleSpawnChance: 0.3 // 30% chance per frame
+    ambientParticleSpawnChance: 0.3, // 30% chance per frame
+    potionDropReduction: 0.5 // Reduce potion drops by 50% since we have health globes
 };
 
 // Speed bonus ranges for item generation
@@ -1157,7 +1158,7 @@ function killMonster(monster) {
     }
     
     // Drop health potion (instant pickup) - reduced chance since we have health globes
-    if (Math.random() < (monster.potionDropChance || 0.3) * 0.5) {
+    if (Math.random() < (monster.potionDropChance || 0.3) * GAME_CONFIG.potionDropReduction) {
         // Auto-pickup potion if space available
         if (gameState.potions.health < gameState.potions.maxHealth) {
             gameState.potions.health++;
@@ -1175,13 +1176,15 @@ function killMonster(monster) {
     createParticles(monster.x, monster.y, monster.color, 15);
     
     // Remove monster after brief delay for death animation
+    // Store the monster ID to safely remove it later
+    const monsterId = monster.id;
     setTimeout(() => {
-        const index = gameState.monsters.indexOf(monster);
+        const index = gameState.monsters.findIndex(m => m.id === monsterId);
         if (index > -1) {
             gameState.monsters.splice(index, 1);
+            gameState.dungeon.enemiesRemaining = gameState.monsters.length;
+            updateUI();
         }
-        gameState.dungeon.enemiesRemaining = gameState.monsters.length;
-        updateUI();
     }, GAME_CONFIG.deathAnimationDurationMs);
 }
 
@@ -3119,8 +3122,8 @@ function update(deltaTime) {
         // Clean up old corpses (fade after configured time)
         gameState.corpses = gameState.corpses.filter(corpse => {
             const age = Date.now() - corpse.fadeTime;
-            if (age > GAME_CONFIG.corpsFadeTimeMs) return false;
-            corpse.alpha = 0.6 * (1 - age / GAME_CONFIG.corpsFadeTimeMs);
+            if (age > GAME_CONFIG.corpseFadeTimeMs) return false;
+            corpse.alpha = 0.6 * (1 - age / GAME_CONFIG.corpseFadeTimeMs);
             return true;
         });
         
@@ -3785,7 +3788,7 @@ function renderMinimap() {
                 minimapCtx.fillStyle = '#c9a227';
             }
             
-            minimapCtx.fillRect(minimapX, minimapY, scaleX + 1, scaleY + 1);
+            minimapCtx.fillRect(minimapX, minimapY, scaleX, scaleY);
         }
     }
     
