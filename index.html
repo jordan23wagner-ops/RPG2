@@ -116,29 +116,22 @@
 
             <!-- Quick Slots (Potions) -->
             <div class="potions-panel">
-                <h3>Quick Slots</h3>
+                <h3>Potions</h3>
                 <div class="potion-slots">
-                    <div class="potion-slot" id="potion-slot-1" data-key="1" title="Press 1">
+                    <div class="potion-slot health-potion" id="potion-slot-1" data-key="Q" title="Press Q to use">
                         <div class="potion-icon">❤️</div>
-                        <div class="potion-count" id="hp-potion-count">0</div>
-                        <div class="potion-key">1</div>
-                    </div>
-                    <div class="potion-slot" id="potion-slot-2" data-key="2" title="Press 2">
-                        <div class="potion-icon">💙</div>
-                        <div class="potion-count" id="mana-potion-count">0</div>
-                        <div class="potion-key">2</div>
-                    </div>
-                    <div class="potion-slot" id="potion-slot-3" data-key="3" title="Press 3">
-                        <div class="potion-icon">⚡</div>
-                        <div class="potion-count" id="speed-potion-count">0</div>
-                        <div class="potion-key">3</div>
-                    </div>
-                    <div class="potion-slot" id="potion-slot-4" data-key="4" title="Press 4">
-                        <div class="potion-icon">💪</div>
-                        <div class="potion-count" id="strength-potion-count">0</div>
-                        <div class="potion-key">4</div>
+                        <div class="potion-count" id="hp-potion-count">5/10</div>
+                        <div class="potion-key">Q</div>
                     </div>
                 </div>
+                <button class="buy-potion-btn" id="buy-potion-btn" style="display: none;">Buy Potion (25g)</button>
+            </div>
+
+            <!-- Location Info -->
+            <div class="location-panel">
+                <h3>Location</h3>
+                <div id="location-info" class="location-info">Town</div>
+                <div id="enemy-count" class="enemy-count" style="display: none;">Enemies: 0/0</div>
             </div>
 
             <!-- Backpack/Inventory -->
@@ -170,10 +163,37 @@
 
     <!-- Controls Help -->
     <div class="controls-help">
-        <span>⬆️⬇️⬅️➡️ Move</span>
+        <span>WASD/⬆️⬇️⬅️➡️ Move</span>
         <span>SPACE Attack</span>
-        <span>1-4 Use Potions</span>
-        <span>Click to Equip/Use Items</span>
+        <span>Q Use Potion</span>
+        <span>E Interact</span>
+    </div>
+
+    <!-- Shop Backdrop -->
+    <div class="shop-backdrop" id="shop-backdrop" style="display: none;"></div>
+
+    <!-- Shop Panel -->
+    <div class="shop-panel" id="shop-panel" style="display: none;">
+        <div class="shop-header">
+            <h2>🏪 Town Shop</h2>
+            <button class="shop-close-btn" onclick="toggleShop()">✕</button>
+        </div>
+        <div class="shop-content">
+            <div class="shop-section">
+                <h3>Upgrades</h3>
+                <div class="upgrade-grid">
+                    <button class="upgrade-btn" id="upgrade-attackUpgrade" onclick="purchaseUpgrade('attackUpgrade')"></button>
+                    <button class="upgrade-btn" id="upgrade-defenseUpgrade" onclick="purchaseUpgrade('defenseUpgrade')"></button>
+                    <button class="upgrade-btn" id="upgrade-healthUpgrade" onclick="purchaseUpgrade('healthUpgrade')"></button>
+                    <button class="upgrade-btn" id="upgrade-speedUpgrade" onclick="purchaseUpgrade('speedUpgrade')"></button>
+                    <button class="upgrade-btn" id="upgrade-potionCapacity" onclick="purchaseUpgrade('potionCapacity')"></button>
+                </div>
+            </div>
+            <div class="shop-section">
+                <h3>Consumables</h3>
+                <button class="buy-btn" onclick="buyPotion()">❤️ Health Potion - 25 Gold</button>
+            </div>
+        </div>
     </div>
 
     <script src="game.js"></script>
