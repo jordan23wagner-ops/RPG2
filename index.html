@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Realms - RPG Adventure</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Left Panel - Character Stats & Equipment -->
+        <div class="left-panel">
+            <div class="character-panel">
+                <h2>Character</h2>
+                <div class="character-name">Hero</div>
+                <div class="character-level">Level: <span id="player-level">1</span></div>
+                
+                <!-- Stats Bars -->
+                <div class="stats-section">
+                    <div class="stat-bar hp-bar">
+                        <div class="stat-label">HP</div>
+                        <div class="bar-container">
+                            <div class="bar-fill hp-fill" id="hp-bar"></div>
+                            <span class="bar-text" id="hp-text">100/100</span>
+                        </div>
+                    </div>
+                    <div class="stat-bar mana-bar">
+                        <div class="stat-label">MP</div>
+                        <div class="bar-container">
+                            <div class="bar-fill mana-fill" id="mana-bar"></div>
+                            <span class="bar-text" id="mana-text">50/50</span>
+                        </div>
+                    </div>
+                    <div class="stat-bar exp-bar">
+                        <div class="stat-label">XP</div>
+                        <div class="bar-container">
+                            <div class="bar-fill exp-fill" id="exp-bar"></div>
+                            <span class="bar-text" id="exp-text">0/100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character Stats -->
+                <div class="character-stats">
+                    <div class="stat-item">
+                        <span class="stat-name">Attack:</span>
+                        <span class="stat-value" id="stat-attack">10</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-name">Defense:</span>
+                        <span class="stat-value" id="stat-defense">5</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-name">Speed:</span>
+                        <span class="stat-value" id="stat-speed">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipment Slots -->
+            <div class="equipment-panel">
+                <h3>Equipment</h3>
+                <div class="equipment-grid">
+                    <div class="equipment-slot" id="slot-helmet" data-slot="helmet" title="Helmet">
+                        <div class="slot-icon">🎩</div>
+                        <div class="slot-label">Head</div>
+                    </div>
+                    <div class="equipment-slot" id="slot-weapon" data-slot="weapon" title="Weapon">
+                        <div class="slot-icon">⚔️</div>
+                        <div class="slot-label">Weapon</div>
+                    </div>
+                    <div class="equipment-slot" id="slot-armor" data-slot="armor" title="Armor">
+                        <div class="slot-icon">🛡️</div>
+                        <div class="slot-label">Chest</div>
+                    </div>
+                    <div class="equipment-slot" id="slot-shield" data-slot="shield" title="Shield">
+                        <div class="slot-icon">🛡️</div>
+                        <div class="slot-label">Shield</div>
+                    </div>
+                    <div class="equipment-slot" id="slot-boots" data-slot="boots" title="Boots">
+                        <div class="slot-icon">👢</div>
+                        <div class="slot-label">Boots</div>
+                    </div>
+                    <div class="equipment-slot" id="slot-ring" data-slot="ring" title="Ring">
+                        <div class="slot-icon">💍</div>
+                        <div class="slot-label">Ring</div>
+                    </div>
+                    <div class="equipment-slot" id="slot-amulet" data-slot="amulet" title="Amulet">
+                        <div class="slot-icon">📿</div>
+                        <div class="slot-label">Amulet</div>
+                    </div>
+                    <div class="equipment-slot" id="slot-gloves" data-slot="gloves" title="Gloves">
+                        <div class="slot-icon">🧤</div>
+                        <div class="slot-label">Gloves</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center - Game Canvas -->
+        <div class="center-panel">
+            <canvas id="game-canvas" width="800" height="600"></canvas>
+            <div class="game-messages" id="game-messages"></div>
+        </div>
+
+        <!-- Right Panel - Inventory & Potions -->
+        <div class="right-panel">
+            <!-- Gold & Currency -->
+            <div class="currency-panel">
+                <div class="currency-item">
+                    <span class="currency-icon">💰</span>
+                    <span class="currency-value" id="gold-amount">0</span>
+                    <span class="currency-label">Gold</span>
+                </div>
+            </div>
+
+            <!-- Quick Slots (Potions) -->
+            <div class="potions-panel">
+                <h3>Quick Slots</h3>
+                <div class="potion-slots">
+                    <div class="potion-slot" id="potion-slot-1" data-key="1" title="Press 1">
+                        <div class="potion-icon">❤️</div>
+                        <div class="potion-count" id="hp-potion-count">0</div>
+                        <div class="potion-key">1</div>
+                    </div>
+                    <div class="potion-slot" id="potion-slot-2" data-key="2" title="Press 2">
+                        <div class="potion-icon">💙</div>
+                        <div class="potion-count" id="mana-potion-count">0</div>
+                        <div class="potion-key">2</div>
+                    </div>
+                    <div class="potion-slot" id="potion-slot-3" data-key="3" title="Press 3">
+                        <div class="potion-icon">⚡</div>
+                        <div class="potion-count" id="speed-potion-count">0</div>
+                        <div class="potion-key">3</div>
+                    </div>
+                    <div class="potion-slot" id="potion-slot-4" data-key="4" title="Press 4">
+                        <div class="potion-icon">💪</div>
+                        <div class="potion-count" id="strength-potion-count">0</div>
+                        <div class="potion-key">4</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backpack/Inventory -->
+            <div class="inventory-panel">
+                <h3>Backpack <span id="inventory-count">(0/28)</span></h3>
+                <div class="inventory-grid" id="inventory-grid">
+                    <!-- 28 inventory slots will be generated by JS -->
+                </div>
+            </div>
+
+            <!-- Loot Window -->
+            <div class="loot-panel" id="loot-panel" style="display: none;">
+                <h3>Loot</h3>
+                <div class="loot-items" id="loot-items"></div>
+                <button class="loot-all-btn" id="loot-all-btn">Loot All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Tooltip -->
+    <div class="item-tooltip" id="item-tooltip" style="display: none;">
+        <div class="tooltip-name" id="tooltip-name"></div>
+        <div class="tooltip-type" id="tooltip-type"></div>
+        <div class="tooltip-rarity" id="tooltip-rarity"></div>
+        <div class="tooltip-stats" id="tooltip-stats"></div>
+        <div class="tooltip-description" id="tooltip-description"></div>
+        <div class="tooltip-actions" id="tooltip-actions"></div>
+    </div>
+
+    <!-- Controls Help -->
+    <div class="controls-help">
+        <span>⬆️⬇️⬅️➡️ Move</span>
+        <span>SPACE Attack</span>
+        <span>1-4 Use Potions</span>
+        <span>Click to Equip/Use Items</span>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
