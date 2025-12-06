@@ -2847,6 +2847,9 @@ function showTooltip(item, event) {
             const statEl = document.createElement('div');
             const statName = statDisplayNames[stat] || stat.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
             
+            // Helper to format stat values with appropriate precision
+            const formatStatValue = (val) => stat === 'speed' ? val.toFixed(1) : Math.floor(val);
+            
             // Calculate stat difference if there's an equipped item
             let comparisonText = '';
             let statClass = 'tooltip-stat positive';
@@ -2856,10 +2859,10 @@ function showTooltip(item, event) {
                 const difference = value - equippedValue;
                 
                 if (difference > 0) {
-                    comparisonText = ` (+${difference.toFixed(stat === 'speed' ? 1 : 0)})`;
+                    comparisonText = ` (+${formatStatValue(difference)})`;
                     statClass = 'tooltip-stat positive';
                 } else if (difference < 0) {
-                    comparisonText = ` (${difference.toFixed(stat === 'speed' ? 1 : 0)})`;
+                    comparisonText = ` (${formatStatValue(difference)})`;
                     statClass = 'tooltip-stat negative';
                 } else {
                     comparisonText = ' (=)';
@@ -2868,7 +2871,7 @@ function showTooltip(item, event) {
             }
             
             statEl.className = statClass;
-            statEl.textContent = `+${value} ${statName}${comparisonText}`;
+            statEl.textContent = `+${formatStatValue(value)} ${statName}${comparisonText}`;
             statsEl.appendChild(statEl);
         }
     }
