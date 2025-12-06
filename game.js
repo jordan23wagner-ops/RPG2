@@ -11,7 +11,7 @@ const GAME_CONFIG = {
     dungeonHeight: 400, // tiles (10x bigger)
     viewportWidth: 800,
     viewportHeight: 600,
-    enemiesPerLevel: 15,
+    enemiesPerLevel: 30, // Doubled from 15
     bossEveryNLevels: 3
 };
 
@@ -55,7 +55,7 @@ const ITEM_TYPES = {
     },
     boots: {
         slot: 'boots',
-        baseStats: { defense: 3, speed: 0.3 },
+        baseStats: { defense: 3, speed: 1.5 },
         icon: '👢',
         names: ['Boots', 'Greaves', 'Sandals', 'Treads', 'Sabatons', 'Shoes']
     },
@@ -156,48 +156,33 @@ const SHOP_UPGRADES = {
 
 const MONSTER_TYPES = [
     {
-        name: 'Rat',
-        icon: '🐀',
-        color: '#2a1a0a',  // Darker brown
-        baseHp: 20,
-        baseDamage: 3,
-        baseExp: 10,
-        baseGold: [1, 5],
-        lootChance: 0.2,
-        potionDropChance: 0.15,
-        speed: 1.5,
-        size: 20,
-        minLevel: 1,
-        isBoss: false
-    },
-    {
-        name: 'Slime',
-        icon: '🟢',
-        color: '#0a3a0a',  // Dark sickly green
-        baseHp: 30,
-        baseDamage: 5,
+        name: 'Zombie',
+        icon: '🧟',
+        color: '#2a3a2a',  // Darker rotting green
+        baseHp: 40,
+        baseDamage: 6,
         baseExp: 15,
         baseGold: [2, 8],
-        lootChance: 0.25,
-        potionDropChance: 0.2,
-        speed: 1,
-        size: 25,
+        lootChance: 0.15,
+        potionDropChance: 0.12,
+        speed: 0.8,
+        size: 28,
         minLevel: 1,
         isBoss: false
     },
     {
-        name: 'Goblin',
-        icon: '👺',
-        color: '#0a2a0a',  // Dark forest green
+        name: 'Fallen',
+        icon: '👤',
+        color: '#3a2a1a',  // Dark corrupted
         baseHp: 50,
         baseDamage: 8,
-        baseExp: 25,
-        baseGold: [5, 15],
-        lootChance: 0.35,
-        potionDropChance: 0.25,
-        speed: 2,
-        size: 28,
-        minLevel: 2,
+        baseExp: 20,
+        baseGold: [3, 10],
+        lootChance: 0.18,
+        potionDropChance: 0.15,
+        speed: 1.5,
+        size: 26,
+        minLevel: 1,
         isBoss: false
     },
     {
@@ -206,88 +191,118 @@ const MONSTER_TYPES = [
         color: '#3a3a3a',  // Dark gray bones
         baseHp: 60,
         baseDamage: 10,
-        baseExp: 35,
-        baseGold: [8, 20],
-        lootChance: 0.4,
-        potionDropChance: 0.25,
+        baseExp: 25,
+        baseGold: [5, 15],
+        lootChance: 0.2,
+        potionDropChance: 0.18,
         speed: 1.5,
         size: 30,
         minLevel: 2,
         isBoss: false
     },
     {
-        name: 'Orc',
-        icon: '👹',
-        color: '#1a2a1a',  // Dark olive
-        baseHp: 100,
-        baseDamage: 15,
-        baseExp: 50,
-        baseGold: [15, 35],
-        lootChance: 0.5,
-        potionDropChance: 0.3,
-        speed: 1.8,
-        size: 35,
+        name: 'Wraith',
+        icon: '👻',
+        color: '#1a1a3a',  // Dark spectral
+        baseHp: 70,
+        baseDamage: 12,
+        baseExp: 30,
+        baseGold: [8, 20],
+        lootChance: 0.22,
+        potionDropChance: 0.2,
+        speed: 2.0,
+        size: 32,
         minLevel: 3,
         isBoss: false
     },
     {
-        name: 'Dark Mage',
-        icon: '🧙',
-        color: '#1a0030',  // Darker purple
-        baseHp: 70,
-        baseDamage: 20,
-        baseExp: 60,
-        baseGold: [20, 45],
-        lootChance: 0.55,
-        potionDropChance: 0.35,
-        speed: 1.2,
-        size: 30,
-        minLevel: 4,
-        isBoss: false
-    },
-    {
-        name: 'Troll',
-        icon: '👾',
-        color: '#2a2a3a',  // Dark slate
-        baseHp: 150,
+        name: 'Werewolf',
+        icon: '🐺',
+        color: '#2a1a0a',  // Dark fur
+        baseHp: 120,
         baseDamage: 18,
-        baseExp: 80,
-        baseGold: [30, 60],
-        lootChance: 0.6,
-        potionDropChance: 0.35,
-        speed: 1,
-        size: 40,
-        minLevel: 5,
+        baseExp: 50,
+        baseGold: [15, 35],
+        lootChance: 0.25,
+        potionDropChance: 0.22,
+        speed: 2.5,
+        size: 35,
+        minLevel: 4,
         isBoss: false
     },
     {
         name: 'Demon',
         icon: '😈',
         color: '#3a0000',  // Darker blood red
-        baseHp: 200,
-        baseDamage: 25,
-        baseExp: 120,
-        baseGold: [50, 100],
-        lootChance: 0.7,
-        potionDropChance: 0.4,
+        baseHp: 180,
+        baseDamage: 22,
+        baseExp: 80,
+        baseGold: [25, 50],
+        lootChance: 0.28,
+        potionDropChance: 0.25,
         speed: 2.2,
         size: 38,
+        minLevel: 5,
+        isBoss: false
+    },
+    {
+        name: 'Elite Zombie',
+        icon: '🧟',
+        color: '#1a2a1a',  // Very dark green
+        baseHp: 200,
+        baseDamage: 25,
+        baseExp: 100,
+        baseGold: [30, 60],
+        lootChance: 0.3,
+        potionDropChance: 0.28,
+        speed: 1.2,
+        size: 40,
         minLevel: 6,
         isBoss: false
     },
     {
-        name: 'Dragon Whelp',
+        name: 'Elite Wraith',
+        icon: '👻',
+        color: '#0a0a2a',  // Very dark spectral
+        baseHp: 220,
+        baseDamage: 28,
+        baseExp: 120,
+        baseGold: [40, 80],
+        lootChance: 0.32,
+        potionDropChance: 0.3,
+        speed: 2.3,
+        size: 42,
+        minLevel: 7,
+        isBoss: false
+    },
+    {
+        name: 'Dragon',
         icon: '🐉',
         color: '#4a1500',  // Dark fire orange
         baseHp: 300,
         baseDamage: 35,
-        baseExp: 200,
-        baseGold: [80, 150],
-        lootChance: 0.8,
-        potionDropChance: 0.5,
+        baseExp: 180,
+        baseGold: [60, 120],
+        lootChance: 0.35,
+        potionDropChance: 0.32,
         speed: 2.5,
         size: 45,
-        minLevel: 7,
+        minLevel: 8,
+        isBoss: false
+    },
+    {
+        name: 'Legendary Demon',
+        icon: '😈',
+        color: '#2a0000',  // Very dark blood red
+        baseHp: 400,
+        baseDamage: 45,
+        baseExp: 250,
+        baseGold: [100, 200],
+        lootChance: 0.4,
+        potionDropChance: 0.35,
+        speed: 2.4,
+        size: 50,
+        minLevel: 9,
         isBoss: false
     },
     {
@@ -296,13 +311,13 @@ const MONSTER_TYPES = [
         color: '#2a0030',  // Dark violet
         baseHp: 500,
         baseDamage: 50,
-        baseExp: 400,
+        baseExp: 350,
         baseGold: [150, 300],
-        lootChance: 1.0,
-        potionDropChance: 0.6,
+        lootChance: 0.45,
+        potionDropChance: 0.38,
         speed: 2,
         size: 55,
-        minLevel: 9,
+        minLevel: 10,
         isBoss: false
     }
 ];
@@ -310,39 +325,39 @@ const MONSTER_TYPES = [
 // Boss monsters for dungeon levels
 const BOSS_TYPES = [
     {
-        name: 'Goblin King',
-        icon: '👺',
-        color: '#002000',  // Very dark green
-        baseHp: 200,
-        baseDamage: 15,
+        name: 'Zombie King',
+        icon: '🧟',
+        color: '#001a00',  // Very dark green
+        baseHp: 250,
+        baseDamage: 18,
         baseExp: 150,
         baseGold: [50, 100],
         lootChance: 1.0,
-        potionDropChance: 1.0,
-        speed: 1.5,
+        potionDropChance: 0.8,
+        speed: 1.0,
         size: 50,
         minLevel: 3,
         isBoss: true,
         guaranteedRarity: 'rare'
     },
     {
-        name: 'Skeleton Lord',
-        icon: '💀',
-        color: '#2a2010',  // Dark bone color
+        name: 'Wraith Lord',
+        icon: '👻',
+        color: '#0a0020',  // Very dark spectral
         baseHp: 400,
         baseDamage: 25,
         baseExp: 300,
         baseGold: [100, 200],
         lootChance: 1.0,
-        potionDropChance: 1.0,
-        speed: 1.8,
+        potionDropChance: 0.85,
+        speed: 2.0,
         size: 55,
         minLevel: 6,
         isBoss: true,
         guaranteedRarity: 'epic'
     },
     {
-        name: 'Demon Lord',
+        name: 'Demon Overlord',
         icon: '😈',
         color: '#200000',  // Very dark blood red
         baseHp: 700,
@@ -350,8 +365,8 @@ const BOSS_TYPES = [
         baseExp: 500,
         baseGold: [200, 400],
         lootChance: 1.0,
-        potionDropChance: 1.0,
-        speed: 2,
+        potionDropChance: 0.9,
+        speed: 2.2,
         size: 60,
         minLevel: 9,
         isBoss: true,
@@ -873,14 +888,19 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
         const numBonuses = rarity === 'rare' ? 1 : rarity === 'epic' ? 2 : rarity === 'legendary' ? 3 : 4;
         for (let i = 0; i < numBonuses; i++) {
             const bonusStat = randomChoice(bonusStats);
-            // Speed bonuses are much smaller to keep movement balanced
+            // Speed bonuses: 1-5 for common/uncommon/rare, 5-10 for epic/legendary/mythic
             const isSpeedStat = bonusStat === 'speed';
-            const baseBonus = isSpeedStat ? randomFloat(0.1, 0.5) : randomRange(3, 10);
-            const scaledBonus = baseBonus * rarityData.statMultiplier * levelScale;
-            const bonusValue = isSpeedStat 
-                ? Math.round(scaledBonus * 10) / 10  // Round to 1 decimal for speed
-                : Math.floor(scaledBonus);
-            stats[bonusStat] = (stats[bonusStat] || 0) + bonusValue;
+            if (isSpeedStat) {
+                const isRareOrHigher = rarity === 'epic' || rarity === 'legendary' || rarity === 'mythic';
+                const baseBonus = isRareOrHigher ? randomFloat(5, 10) : randomFloat(1, 5);
+                const bonusValue = Math.round(baseBonus * 10) / 10;  // Round to 1 decimal for speed
+                stats[bonusStat] = (stats[bonusStat] || 0) + bonusValue;
+            } else {
+                const baseBonus = randomRange(3, 10);
+                const scaledBonus = baseBonus * rarityData.statMultiplier * levelScale;
+                const bonusValue = Math.floor(scaledBonus);
+                stats[bonusStat] = (stats[bonusStat] || 0) + bonusValue;
+            }
         }
     }
     
