@@ -2843,35 +2843,56 @@ function showTooltip(item, event) {
         // Get currently equipped item in the same slot for comparison
         const equippedItem = item.slot ? gameState.player.equipment[item.slot] : null;
         
-        for (const [stat, value] of Object.entries(item.stats)) {
+        // Helper to format stat values with appropriate precision
+        const formatStatValue = (val, statName) => statName === 'speed' ? val.toFixed(1) : Math.floor(val);
+        
+        // Collect all unique stats from both items
+        const allStats = new Set([...Object.keys(item.stats)]);
+        if (equippedItem && equippedItem.stats) {
+            Object.keys(equippedItem.stats).forEach(stat => allStats.add(stat));
+        }
+        
+        for (const stat of allStats) {
             const statEl = document.createElement('div');
             const statName = statDisplayNames[stat] || stat.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
             
-            // Helper to format stat values with appropriate precision
-            const formatStatValue = (val) => stat === 'speed' ? val.toFixed(1) : Math.floor(val);
+            const newValue = item.stats[stat] || 0;
+            const equippedValue = (equippedItem && equippedItem.stats && equippedItem.stats[stat]) || 0;
             
             // Calculate stat difference if there's an equipped item
             let comparisonText = '';
-            let statClass = 'tooltip-stat positive';
+            let statClass = 'tooltip-stat';
+            let displayText = '';
             
             if (equippedItem && equippedItem.stats) {
-                const equippedValue = equippedItem.stats[stat] || 0;
-                const difference = value - equippedValue;
+                const difference = newValue - equippedValue;
                 
-                if (difference > 0) {
-                    comparisonText = ` (+${formatStatValue(difference)})`;
-                    statClass = 'tooltip-stat positive';
-                } else if (difference < 0) {
-                    comparisonText = ` (${formatStatValue(difference)})`;
-                    statClass = 'tooltip-stat negative';
+                if (newValue > 0) {
+                    // New item has this stat
+                    if (difference > 0) {
+                        comparisonText = ` (+${formatStatValue(difference, stat)})`;
+                        statClass = 'tooltip-stat positive';
+                    } else if (difference < 0) {
+                        comparisonText = ` (${formatStatValue(difference, stat)})`;
+                        statClass = 'tooltip-stat negative';
+                    } else {
+                        comparisonText = ' (=)';
+                    }
+                    displayText = `+${formatStatValue(newValue, stat)} ${statName}${comparisonText}`;
                 } else {
-                    comparisonText = ' (=)';
-                    statClass = 'tooltip-stat';
+                    // New item doesn't have this stat, but equipped does (you're losing it)
+                    comparisonText = ` (-${formatStatValue(equippedValue, stat)})`;
+                    statClass = 'tooltip-stat negative';
+                    displayText = `${statName}${comparisonText}`;
                 }
+            } else {
+                // No equipped item, just show the stat
+                statClass = 'tooltip-stat positive';
+                displayText = `+${formatStatValue(newValue, stat)} ${statName}`;
             }
             
             statEl.className = statClass;
-            statEl.textContent = `+${formatStatValue(value)} ${statName}${comparisonText}`;
+            statEl.textContent = displayText;
             statsEl.appendChild(statEl);
         }
     }
