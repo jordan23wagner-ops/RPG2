@@ -879,7 +879,12 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
     
     const stats = {};
     for (const [stat, value] of Object.entries(itemType.baseStats)) {
-        stats[stat] = Math.floor(value * rarityData.statMultiplier * levelScale * randomFloat(0.8, 1.2));
+        // Speed stats should not be scaled by rarity/level - keep them small
+        if (stat === 'speed') {
+            stats[stat] = value; // Use base value only for speed
+        } else {
+            stats[stat] = Math.floor(value * rarityData.statMultiplier * levelScale * randomFloat(0.8, 1.2));
+        }
     }
     
     // Add bonus stats for higher rarities
@@ -888,11 +893,11 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
         const numBonuses = rarity === 'rare' ? 1 : rarity === 'epic' ? 2 : rarity === 'legendary' ? 3 : 4;
         for (let i = 0; i < numBonuses; i++) {
             const bonusStat = randomChoice(bonusStats);
-            // Speed bonuses: 1-5 for common/uncommon/rare, 5-10 for epic/legendary/mythic
+            // Speed bonuses: 1-5 for rare, 5-10 for epic/legendary/mythic
             const isSpeedStat = bonusStat === 'speed';
             if (isSpeedStat) {
-                const isRareOrHigher = rarity === 'epic' || rarity === 'legendary' || rarity === 'mythic';
-                const baseBonus = isRareOrHigher ? randomFloat(5, 10) : randomFloat(1, 5);
+                const isReallyRare = rarity === 'epic' || rarity === 'legendary' || rarity === 'mythic';
+                const baseBonus = isReallyRare ? randomFloat(5, 10) : randomFloat(1, 5);
                 const bonusValue = Math.round(baseBonus * 10) / 10;  // Round to 1 decimal for speed
                 stats[bonusStat] = (stats[bonusStat] || 0) + bonusValue;
             } else {
