@@ -26,10 +26,10 @@ const GAME_CONFIG = {
 
 // Speed bonus ranges for item generation
 const SPEED_BONUS_CONFIG = {
-    rareMin: 1,
-    rareMax: 5,
-    epicMin: 5,
-    epicMax: 10
+    rareMin: 0.5,
+    rareMax: 2.5,
+    epicMin: 2.5,
+    epicMax: 5
 };
 
 // ============================================
@@ -72,7 +72,7 @@ const ITEM_TYPES = {
     },
     boots: {
         slot: 'boots',
-        baseStats: { defense: 3, speed: 1.5 }, // Base speed increased to 1.5 to work with new configurable speed bonus system (see SPEED_BONUS_CONFIG)
+        baseStats: { defense: 3, speed: 0.75 }, // Base speed reduced to 0.75 to work with reduced speed bonus system (max 5)
         icon: '👢',
         names: ['Boots', 'Greaves', 'Sandals', 'Treads', 'Sabatons', 'Shoes']
     },
@@ -718,7 +718,7 @@ function spawnDungeonEnemies() {
         
         for (let j = 0; j < enemiesInRoom; j++) {
             const monsterType = randomChoice(availableMonsters);
-            const levelScale = 1 + (level - 1) * 0.15;
+            const levelScale = 1 + (level - 1) * 0.3; // Increased from 0.15 to 0.3 for stronger monsters
             
             const x = (room.x + randomRange(1, room.w - 2)) * GAME_CONFIG.tileSize;
             const y = (room.y + randomRange(1, room.h - 2)) * GAME_CONFIG.tileSize;
@@ -757,7 +757,7 @@ function spawnDungeonEnemies() {
     if (level % GAME_CONFIG.bossEveryNLevels === 0 && !gameState.dungeon.bossDefeated) {
         const bossIndex = Math.min(Math.floor(level / GAME_CONFIG.bossEveryNLevels) - 1, BOSS_TYPES.length - 1);
         const bossType = BOSS_TYPES[bossIndex];
-        const levelScale = 1 + (level - 1) * 0.15;
+        const levelScale = 1 + (level - 1) * 0.3; // Increased from 0.15 to 0.3 for stronger bosses
         
         // Spawn boss in last room (exit room)
         const lastRoom = rooms[rooms.length - 1];
@@ -2840,11 +2840,35 @@ function showTooltip(item, event) {
     
     statsEl.innerHTML = '';
     if (item.stats) {
+        // Get currently equipped item in the same slot for comparison
+        const equippedItem = item.slot ? gameState.player.equipment[item.slot] : null;
+        
         for (const [stat, value] of Object.entries(item.stats)) {
             const statEl = document.createElement('div');
-            statEl.className = 'tooltip-stat positive';
             const statName = statDisplayNames[stat] || stat.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-            statEl.textContent = `+${value} ${statName}`;
+            
+            // Calculate stat difference if there's an equipped item
+            let comparisonText = '';
+            let statClass = 'tooltip-stat positive';
+            
+            if (equippedItem && equippedItem.stats) {
+                const equippedValue = equippedItem.stats[stat] || 0;
+                const difference = value - equippedValue;
+                
+                if (difference > 0) {
+                    comparisonText = ` (+${difference.toFixed(stat === 'speed' ? 1 : 0)})`;
+                    statClass = 'tooltip-stat positive';
+                } else if (difference < 0) {
+                    comparisonText = ` (${difference.toFixed(stat === 'speed' ? 1 : 0)})`;
+                    statClass = 'tooltip-stat negative';
+                } else {
+                    comparisonText = ' (=)';
+                    statClass = 'tooltip-stat';
+                }
+            }
+            
+            statEl.className = statClass;
+            statEl.textContent = `+${value} ${statName}${comparisonText}`;
             statsEl.appendChild(statEl);
         }
     }
