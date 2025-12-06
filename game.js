@@ -15,6 +15,14 @@ const GAME_CONFIG = {
     bossEveryNLevels: 3
 };
 
+// Speed bonus ranges for item generation
+const SPEED_BONUS_CONFIG = {
+    rareMin: 1,
+    rareMax: 5,
+    epicMin: 5,
+    epicMax: 10
+};
+
 // ============================================
 // ITEM DEFINITIONS
 // ============================================
@@ -55,7 +63,7 @@ const ITEM_TYPES = {
     },
     boots: {
         slot: 'boots',
-        baseStats: { defense: 3, speed: 1.5 },
+        baseStats: { defense: 3, speed: 1.5 }, // Speed increased from 0.3 to 1.5 to balance with new speed bonus system (1-5 for rare, 5-10 for epic+)
         icon: '👢',
         names: ['Boots', 'Greaves', 'Sandals', 'Treads', 'Sabatons', 'Shoes']
     },
@@ -893,11 +901,13 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
         const numBonuses = rarity === 'rare' ? 1 : rarity === 'epic' ? 2 : rarity === 'legendary' ? 3 : 4;
         for (let i = 0; i < numBonuses; i++) {
             const bonusStat = randomChoice(bonusStats);
-            // Speed bonuses: 1-5 for rare, 5-10 for epic/legendary/mythic
             const isSpeedStat = bonusStat === 'speed';
             if (isSpeedStat) {
+                // Speed bonuses: SPEED_BONUS_CONFIG.rareMin-rareMax for rare, epicMin-epicMax for epic/legendary/mythic
                 const isReallyRare = rarity === 'epic' || rarity === 'legendary' || rarity === 'mythic';
-                const baseBonus = isReallyRare ? randomFloat(5, 10) : randomFloat(1, 5);
+                const baseBonus = isReallyRare 
+                    ? randomFloat(SPEED_BONUS_CONFIG.epicMin, SPEED_BONUS_CONFIG.epicMax) 
+                    : randomFloat(SPEED_BONUS_CONFIG.rareMin, SPEED_BONUS_CONFIG.rareMax);
                 const bonusValue = Math.round(baseBonus * 10) / 10;  // Round to 1 decimal for speed
                 stats[bonusStat] = (stats[bonusStat] || 0) + bonusValue;
             } else {
