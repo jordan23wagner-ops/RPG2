@@ -1,5 +1,6 @@
 // Dark Realms RPG - Main Game Engine
 // Top-down RPG inspired by Diablo and Runescape
+console.log('✅ GAME.JS V4.5 LOADED - Tooltip Click Fix!');
 
 // ============================================
 // GAME CONFIGURATION
@@ -37,13 +38,172 @@ const SPEED_BONUS_CONFIG = {
 // ============================================
 
 const RARITIES = {
-    common: { name: 'Common', color: '#808080', dropChance: 0.50, statMultiplier: 1.0 },
-    uncommon: { name: 'Uncommon', color: '#1eff00', dropChance: 0.25, statMultiplier: 1.3 },
-    rare: { name: 'Rare', color: '#0070dd', dropChance: 0.15, statMultiplier: 1.6 },
-    epic: { name: 'Epic', color: '#a335ee', dropChance: 0.07, statMultiplier: 2.0 },
-    legendary: { name: 'Legendary', color: '#ff8000', dropChance: 0.025, statMultiplier: 2.5 },
-    mythic: { name: 'Mythic', color: '#e6cc80', dropChance: 0.005, statMultiplier: 3.5 }
+    common: { name: 'Common', color: '#808080', dropChance: 0.595, statMultiplier: 1.0 },
+    uncommon: { name: 'Uncommon', color: '#1eff00', dropChance: 0.30, statMultiplier: 1.3 },
+    rare: { name: 'Rare', color: '#0070dd', dropChance: 0.095, statMultiplier: 1.6 },
+    epic: { name: 'Epic', color: '#a335ee', dropChance: 0.01, statMultiplier: 2.0 },
+    legendary: { name: 'Legendary', color: '#ff8000', dropChance: 0.0025, statMultiplier: 2.5 },
+    mythic: { name: 'Mythic', color: '#e6cc80', dropChance: 0.001, statMultiplier: 3.5 },
+    radiant: { name: 'Radiant', color: '#ff1493', dropChance: 0, statMultiplier: 5.0 } // Crafted only
 };
+
+// ============================================
+// BOSS CRAFTING MATERIALS
+// ============================================
+
+const BOSS_MATERIALS = {
+    'Zombie King': {
+        name: 'Putrid Heart',
+        icon: '💚',
+        description: 'A rotting heart that still beats with unholy energy',
+        dropChance: 0.01
+    },
+    'Wraith Lord': {
+        name: 'Spectral Essence',
+        icon: '👻',
+        description: 'Condensed soul energy from the ethereal plane',
+        dropChance: 0.01
+    },
+    'Demon Overlord': {
+        name: 'Infernal Core',
+        icon: '🔴',
+        description: 'A burning core fragment from the depths of hell',
+        dropChance: 0.01
+    },
+    'Ancient Dragon': {
+        name: 'Dragon Scale',
+        icon: '🐉',
+        description: 'An ancient scale harder than any mortal metal',
+        dropChance: 0.01
+    },
+    'Lich King': {
+        name: 'Phylactery Shard',
+        icon: '💎',
+        description: 'A fragment of eternal unlife and dark magic',
+        dropChance: 0.01
+    },
+    'Vampire Lord': {
+        name: 'Blood Crystal',
+        icon: '🩸',
+        description: 'Crystalized blood of a thousand victims',
+        dropChance: 0.01
+    },
+    'Fallen Angel': {
+        name: 'Corrupted Halo',
+        icon: '⭕',
+        description: 'A twisted remnant of divine grace turned dark',
+        dropChance: 0.01
+    },
+    'Abyssal Horror': {
+        name: 'Void Stone',
+        icon: '⚫',
+        description: 'A stone that consumes light and sanity alike',
+        dropChance: 0.01
+    },
+    'Infernal Titan': {
+        name: 'Titan Ember',
+        icon: '🔥',
+        description: 'An eternal flame from the forge of creation',
+        dropChance: 0.01
+    },
+    'Chaos Wyrm': {
+        name: 'Chaos Fang',
+        icon: '🦷',
+        description: 'A fang that warps reality with each touch',
+        dropChance: 0.01
+    },
+    'Void Reaver': {
+        name: 'Void Shard',
+        icon: '🌑',
+        description: 'A fragment of pure nothingness given form',
+        dropChance: 0.01
+    }
+};
+
+// ============================================
+// RADIANT CRAFTING RECIPES
+// ============================================
+
+const RADIANT_RECIPES = [
+    {
+        id: 'undying_blade',
+        name: 'Undying Blade',
+        type: 'weapon',
+        icon: '⚔️',
+        materials: {
+            'Putrid Heart': 3,
+            'Spectral Essence': 3,
+            'Phylactery Shard': 2
+        },
+        stats: { attack: 150, maxHp: 100, lifeSteal: 0.30 },
+        description: 'A blade forged from undeath itself'
+    },
+    {
+        id: 'infernal_destroyer',
+        name: 'Infernal Destroyer',
+        type: 'weapon',
+        icon: '⚔️',
+        materials: {
+            'Infernal Core': 5,
+            'Titan Ember': 3,
+            'Dragon Scale': 2
+        },
+        stats: { attack: 200, fireDamage: 0.50, maxHp: 80 },
+        description: 'A weapon of pure elemental destruction'
+    },
+    {
+        id: 'voidforged_armor',
+        name: 'Voidforged Armor',
+        type: 'armor',
+        icon: '🛡️',
+        materials: {
+            'Void Stone': 4,
+            'Void Shard': 3,
+            'Chaos Fang': 2
+        },
+        stats: { defense: 120, maxHp: 300, speed: 2.0 },
+        description: 'Armor woven from the fabric of the void'
+    },
+    {
+        id: 'crown_of_dominion',
+        name: 'Crown of Dominion',
+        type: 'helmet',
+        icon: '👑',
+        materials: {
+            'Corrupted Halo': 3,
+            'Phylactery Shard': 2,
+            'Blood Crystal': 2
+        },
+        stats: { defense: 80, maxHp: 150, maxMana: 200, attack: 50 },
+        description: 'A crown that commands both the living and the dead'
+    },
+    {
+        id: 'dragonscale_shield',
+        name: 'Dragonscale Aegis',
+        type: 'shield',
+        icon: '🛡️',
+        materials: {
+            'Dragon Scale': 5,
+            'Titan Ember': 2,
+            'Infernal Core': 2
+        },
+        stats: { defense: 150, maxHp: 250 },
+        description: 'An impenetrable shield forged from dragon scales'
+    },
+    {
+        id: 'bloodbound_amulet',
+        name: 'Bloodbound Amulet',
+        type: 'amulet',
+        icon: '📿',
+        materials: {
+            'Blood Crystal': 4,
+            'Putrid Heart': 2,
+            'Spectral Essence': 2
+        },
+        stats: { maxHp: 200, attack: 60, lifeSteal: 0.25 },
+        description: 'An amulet that binds life and death'
+    }
+];
 
 const ITEM_TYPES = {
     weapon: {
@@ -105,9 +265,205 @@ const RARITY_PREFIXES = {
     mythic: ['Godforged', 'Primordial', 'Cosmic', 'Transcendent', 'Omnipotent']
 };
 
+// ============================================
+// ITEM SET SYSTEM
+// ============================================
+
+const ITEM_SETS = {
+    shadowsReaper: {
+        name: "Shadow's Reaper",
+        theme: 'dark',
+        rarity: 'legendary',
+        pieces: ['weapon', 'helmet', 'armor', 'gloves', 'boots'],
+        bonuses: {
+            2: { description: '+15% Attack Speed', stats: { speed: 1.5 } },
+            3: { description: '+50 Max HP, +20 Attack', stats: { maxHp: 50, attack: 20 } },
+            5: { description: '+100 Max HP, Life Steal on Hit', stats: { maxHp: 100, lifeSteal: 0.15 } }
+        },
+        itemStats: {
+            weapon: { attack: 45, speed: 1.0 },
+            helmet: { defense: 25, maxHp: 40 },
+            armor: { defense: 50, maxHp: 80 },
+            gloves: { attack: 15, defense: 10 },
+            boots: { defense: 15, speed: 2.0 }
+        }
+    },
+    bloodlordsBane: {
+        name: "Bloodlord's Bane",
+        theme: 'vampiric',
+        rarity: 'legendary',
+        pieces: ['weapon', 'helmet', 'armor', 'amulet', 'ring'],
+        bonuses: {
+            2: { description: '+25 Max HP, +10% Life Steal', stats: { maxHp: 25, lifeSteal: 0.10 } },
+            3: { description: '+30 Attack, +25 Defense', stats: { attack: 30, defense: 25 } },
+            5: { description: '+150 Max HP, Vampiric Aura', stats: { maxHp: 150, lifeSteal: 0.25 } }
+        },
+        itemStats: {
+            weapon: { attack: 50, maxHp: 30 },
+            helmet: { defense: 30, maxHp: 50 },
+            armor: { defense: 55, maxHp: 100 },
+            amulet: { maxHp: 60, attack: 15 },
+            ring: { attack: 20, maxHp: 40 }
+        }
+    },
+    frostwardenPlate: {
+        name: "Frostwarden Plate",
+        theme: 'ice',
+        rarity: 'epic',
+        pieces: ['helmet', 'armor', 'shield', 'gloves', 'boots'],
+        bonuses: {
+            2: { description: '+40 Defense', stats: { defense: 40 } },
+            3: { description: '+75 Max HP, +30 Defense', stats: { maxHp: 75, defense: 30 } },
+            5: { description: '+150 Max HP, Frozen Aura', stats: { maxHp: 150, defense: 50 } }
+        },
+        itemStats: {
+            helmet: { defense: 35, maxHp: 45 },
+            armor: { defense: 60, maxHp: 90 },
+            shield: { defense: 45, maxHp: 50 },
+            gloves: { defense: 20, maxHp: 30 },
+            boots: { defense: 25, speed: 1.0 }
+        }
+    },
+    infernoWrath: {
+        name: "Inferno's Wrath",
+        theme: 'fire',
+        rarity: 'mythic',
+        pieces: ['weapon', 'helmet', 'armor', 'gloves', 'amulet'],
+        bonuses: {
+            2: { description: '+35 Attack', stats: { attack: 35 } },
+            3: { description: '+50 Attack, +40 Max HP', stats: { attack: 50, maxHp: 40 } },
+            5: { description: '+100 Attack, Burning Aura', stats: { attack: 100, fireDamage: 0.30 } }
+        },
+        itemStats: {
+            weapon: { attack: 60, maxHp: 20 },
+            helmet: { defense: 25, maxHp: 45, attack: 10 },
+            armor: { defense: 45, maxHp: 85, attack: 15 },
+            gloves: { attack: 25, defense: 15 },
+            amulet: { maxHp: 70, attack: 30 }
+        }
+    },
+    voidwalkerGarb: {
+        name: "Voidwalker Garb",
+        theme: 'void',
+        rarity: 'mythic',
+        pieces: ['helmet', 'armor', 'boots', 'ring', 'amulet'],
+        bonuses: {
+            2: { description: '+50 Max Mana, +1.5 Speed', stats: { maxMana: 50, speed: 1.5 } },
+            3: { description: '+100 Max Mana, +50 Max HP', stats: { maxMana: 100, maxHp: 50 } },
+            5: { description: '+200 Max Mana, Void Step', stats: { maxMana: 200, speed: 3.0 } }
+        },
+        itemStats: {
+            helmet: { defense: 30, maxMana: 40, maxHp: 40 },
+            armor: { defense: 50, maxMana: 60, maxHp: 80 },
+            boots: { defense: 20, speed: 2.5, maxMana: 30 },
+            ring: { maxMana: 50, attack: 15 },
+            amulet: { maxMana: 80, maxHp: 60 }
+        }
+    },
+    dragonslayerRegalia: {
+        name: "Dragonslayer Regalia",
+        theme: 'dragon',
+        rarity: 'mythic',
+        pieces: ['weapon', 'helmet', 'armor', 'shield', 'gloves'],
+        bonuses: {
+            2: { description: '+40 Attack, +40 Defense', stats: { attack: 40, defense: 40 } },
+            3: { description: '+80 Max HP, +50 Attack', stats: { maxHp: 80, attack: 50 } },
+            5: { description: '+200 Max HP, Dragon Might', stats: { maxHp: 200, attack: 75, defense: 50 } }
+        },
+        itemStats: {
+            weapon: { attack: 65, defense: 10 },
+            helmet: { defense: 35, maxHp: 55, attack: 10 },
+            armor: { defense: 65, maxHp: 110 },
+            shield: { defense: 50, maxHp: 60 },
+            gloves: { attack: 30, defense: 20 }
+        }
+    }
+};
+
 // Simplified potion system - only healing potions, instant pickup
 const POTION_TYPES = {
     health: { name: 'Health Potion', icon: '❤️', effect: 'hp', amount: 50, color: '#dc3545' }
+};
+
+// ============================================
+// POINTS OF INTEREST
+// ============================================
+
+const POI_TYPES = {
+    shrine: {
+        name: 'Mysterious Shrine',
+        icon: '⛩️',
+        color: '#9370db',
+        description: 'A shrine radiating ancient power',
+        effect: 'buff',
+        buffs: [
+            { name: 'Blessing of Strength', stat: 'attack', amount: 20, duration: 300000 },
+            { name: 'Blessing of Fortitude', stat: 'defense', amount: 15, duration: 300000 },
+            { name: 'Blessing of Speed', stat: 'speed', amount: 2, duration: 300000 },
+            { name: 'Blessing of Vitality', stat: 'maxHp', amount: 100, duration: 300000 }
+        ],
+        cooldown: 0,
+        oneTimeUse: false
+    },
+    fountain: {
+        name: 'Blood Fountain',
+        icon: '⛲',
+        color: '#8b0000',
+        description: 'A fountain of crimson liquid pulses with dark energy',
+        effect: 'heal',
+        healAmount: 1.0, // Full heal
+        cooldown: 0,
+        oneTimeUse: false
+    },
+    chest: {
+        name: 'Treasure Chest',
+        icon: '📦',
+        color: '#ffd700',
+        description: 'A locked chest filled with riches',
+        effect: 'loot',
+        lootTable: {
+            gold: [100, 500],
+            itemCount: [2, 4],
+            guaranteedRarity: 'rare'
+        },
+        cooldown: 0,
+        oneTimeUse: true
+    },
+    altar: {
+        name: 'Dark Altar',
+        icon: '🗿',
+        color: '#4a1a1a',
+        description: 'An altar of sacrifice offers power for a price',
+        effect: 'sacrifice',
+        costHpPercent: 0.25, // Costs 25% HP
+        reward: {
+            gold: [200, 400],
+            exp: 500,
+            buff: { stat: 'attack', amount: 30, duration: 600000 }
+        },
+        cooldown: 0,
+        oneTimeUse: false
+    },
+    portal: {
+        name: 'Mystic Portal',
+        icon: '🌀',
+        color: '#00ffff',
+        description: 'A swirling portal to unknown places',
+        effect: 'transport',
+        destination: 'random', // Teleports to random room
+        cooldown: 60000, // 1 minute cooldown
+        oneTimeUse: false
+    },
+    setForge: {
+        name: 'Ancient Forge',
+        icon: '🔨',
+        color: '#ff6600',
+        description: 'An ancient forge capable of creating legendary sets',
+        effect: 'setItem',
+        cooldown: 0,
+        oneTimeUse: true,
+        guaranteedSet: true
+    }
 };
 
 // ============================================
@@ -426,6 +782,118 @@ const BOSS_TYPES = [
         minLevel: 12,
         isBoss: true,
         guaranteedRarity: 'mythic'
+    },
+    {
+        name: 'Lich King',
+        icon: '💀',
+        color: '#1a001a',  // Dark purple necromancy
+        baseHp: 1500,
+        baseDamage: 70,
+        baseExp: 1200,
+        baseGold: [600, 1200],
+        lootChance: 1.0,
+        potionDropChance: 1.0,
+        speed: 1.8,
+        size: 65,
+        minLevel: 15,
+        isBoss: true,
+        guaranteedRarity: 'mythic'
+    },
+    {
+        name: 'Vampire Lord',
+        icon: '🦇',
+        color: '#2a0000',  // Blood red
+        baseHp: 1800,
+        baseDamage: 75,
+        baseExp: 1500,
+        baseGold: [800, 1500],
+        lootChance: 1.0,
+        potionDropChance: 1.0,
+        speed: 3.0,
+        size: 60,
+        minLevel: 18,
+        isBoss: true,
+        guaranteedRarity: 'mythic'
+    },
+    {
+        name: 'Fallen Angel',
+        icon: '😇',
+        color: '#1a1a00',  // Dark corrupted gold
+        baseHp: 2000,
+        baseDamage: 80,
+        baseExp: 1800,
+        baseGold: [1000, 2000],
+        lootChance: 1.0,
+        potionDropChance: 1.0,
+        speed: 2.8,
+        size: 68,
+        minLevel: 21,
+        isBoss: true,
+        guaranteedRarity: 'mythic'
+    },
+    {
+        name: 'Abyssal Horror',
+        icon: '👁️',
+        color: '#000a1a',  // Deep void blue
+        baseHp: 2500,
+        baseDamage: 90,
+        baseExp: 2200,
+        baseGold: [1500, 2500],
+        lootChance: 1.0,
+        potionDropChance: 1.0,
+        speed: 2.0,
+        size: 75,
+        minLevel: 24,
+        isBoss: true,
+        guaranteedRarity: 'mythic'
+    },
+    {
+        name: 'Infernal Titan',
+        icon: '🔥',
+        color: '#3a0a00',  // Dark flame
+        baseHp: 3000,
+        baseDamage: 100,
+        baseExp: 2800,
+        baseGold: [2000, 3000],
+        lootChance: 1.0,
+        potionDropChance: 1.0,
+        speed: 1.5,
+        size: 80,
+        minLevel: 27,
+        isBoss: true,
+        guaranteedRarity: 'mythic'
+    },
+    {
+        name: 'Chaos Wyrm',
+        icon: '🐉',
+        color: '#2a0a2a',  // Dark chaos purple
+        baseHp: 3200,
+        baseDamage: 105,
+        baseExp: 3200,
+        baseGold: [2200, 3500],
+        lootChance: 1.0,
+        potionDropChance: 1.0,
+        speed: 2.2,
+        size: 75,
+        minLevel: 28,
+        isBoss: true,
+        guaranteedRarity: 'mythic'
+    },
+    {
+        name: 'Void Reaver',
+        icon: '🌀',
+        color: '#0a0a0a',  // Pure darkness
+        baseHp: 3500,
+        baseDamage: 110,
+        baseExp: 3500,
+        baseGold: [2500, 4000],
+        lootChance: 1.0,
+        potionDropChance: 1.0,
+        speed: 2.5,
+        size: 70,
+        minLevel: 30,
+        isBoss: true,
+        guaranteedRarity: 'mythic'
     }
 ];
 
@@ -436,6 +904,7 @@ const BOSS_TYPES = [
 const gameState = {
     currentLocation: 'town', // 'town' or 'dungeon'
     dungeonLevel: 1,
+    craftingMaterials: {}, // Boss materials for crafting
     player: {
         x: 400,
         y: 300,
@@ -482,7 +951,7 @@ const gameState = {
             potionCapacity: 0
         }
     },
-    inventory: [],
+    inventory: Array(28).fill(null),
     maxInventory: 28,
     potions: {
         health: 5,
@@ -510,12 +979,23 @@ const gameState = {
         totalEnemies: 0,
         bossSpawned: false,
         bossDefeated: false,
-        highestLevelReached: 1
+        highestLevelReached: 1,
+        pointsOfInterest: [], // POIs in current dungeon
+        exploredRooms: new Set(), // Track visited rooms
+        roomDescriptions: [], // Room descriptions
+        theme: null, // Current dungeon theme
+        environmentalStory: null // Environmental storytelling
+    },
+    sets: {
+        equipped: {}, // Track equipped set pieces by set name
+        bonusesActive: [] // Currently active set bonuses
     },
     town: {
         shopOpen: false,
         dungeonEntranceX: 700,
-        dungeonEntranceY: 300
+        dungeonEntranceY: 300,
+        forgeX: 220,
+        forgeY: 150
     },
     camera: {
         x: 0,
@@ -525,6 +1005,7 @@ const gameState = {
     regenTimer: 0,
     isPaused: false,
     showShop: false,
+    showMinimap: true, // Toggle minimap visibility with 'M' key
     // Diablo-inspired features
     corpses: [], // Persistent corpses on ground
     healthGlobes: [], // Health pickups
@@ -547,6 +1028,14 @@ function resizeCanvas() {
 
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
+
+// Hide tooltip when clicking anywhere
+document.addEventListener('click', (e) => {
+    const tooltip = document.getElementById('item-tooltip');
+    if (tooltip && !tooltip.contains(e.target)) {
+        hideTooltip();
+    }
+});
 
 // ============================================
 // UTILITY FUNCTIONS
@@ -698,6 +1187,10 @@ function generateDungeon(level) {
     gameState.dungeon.entrance = { x: entranceX, y: entranceY };
     gameState.dungeon.exit = { x: exitX, y: exitY };
     gameState.dungeon.rooms = rooms;
+    gameState.dungeon.exploredRooms = new Set(); // Track which rooms have been explored
+    
+    // PROCEDURAL: Generate room descriptions for each room
+    gameState.dungeon.roomDescriptions = rooms.map(() => proceduralGen.generateRoomDescription());
     
     return { entranceX, entranceY, rooms };
 }
@@ -729,14 +1222,27 @@ function spawnDungeonEnemies() {
             // DIABLO FEATURE 9: Random affix chance (20% for champions)
             let affix = null;
             let affixMultiplier = 1.0;
+            let isChampion = false;
             if (Math.random() < GAME_CONFIG.championSpawnChance && level >= 2) {
                 affix = randomChoice(ENEMY_AFFIXES);
                 affixMultiplier = affix.hpMultiplier;
+                isChampion = true;
             }
+            
+            // PROCEDURAL: Generate enemy name and description
+            const proceduralName = proceduralGen.generateEnemyName(monsterType.name, isChampion, false);
+            const proceduralDesc = proceduralGen.generateEnemyDescription(monsterType.name);
+            
+            // Generate visual variation seed from name
+            const spriteSeed = proceduralName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             
             gameState.monsters.push({
                 id: Date.now() + Math.random(),
                 ...monsterType,
+                name: proceduralName, // Use procedural name
+                description: proceduralDesc, // Add description
+                baseName: monsterType.name, // Keep original for reference
+                spriteSeed: spriteSeed, // For procedural sprite variations
                 x: x,
                 y: y,
                 hp: Math.floor(monsterType.baseHp * levelScale * affixMultiplier),
@@ -767,9 +1273,20 @@ function spawnDungeonEnemies() {
         const goldMin = Math.floor(bossType.baseGold[0] * levelScale);
         const goldMax = Math.floor(bossType.baseGold[1] * levelScale);
         
+        // PROCEDURAL: Generate boss name and description
+        const proceduralBossName = proceduralGen.generateEnemyName(bossType.name, false, true);
+        const proceduralBossDesc = proceduralGen.generateEnemyDescription(bossType.name);
+        
+        // Generate visual variation seed from name
+        const bossSeed = proceduralBossName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        
         gameState.monsters.push({
             id: Date.now() + Math.random(),
             ...bossType,
+            name: proceduralBossName, // Use procedural name
+            description: proceduralBossDesc, // Add description
+            baseName: bossType.name, // Keep original for reference
+            spriteSeed: bossSeed, // For procedural sprite variations
             x: bossX,
             y: bossY,
             hp: Math.floor(bossType.baseHp * levelScale),
@@ -824,6 +1341,10 @@ function enterDungeon(level) {
         gameState.dungeon.highestLevelReached = level;
     }
     
+    // PROCEDURAL: Generate dungeon theme
+    const dungeonTheme = proceduralGen.generateDungeonTheme(level);
+    gameState.dungeon.theme = dungeonTheme;
+    
     // Generate new dungeon
     const dungeonInfo = generateDungeon(level);
     
@@ -834,7 +1355,23 @@ function enterDungeon(level) {
     // Spawn enemies
     spawnDungeonEnemies();
     
-    addMessage(`Entering Dungeon Level ${level}... ${gameState.dungeon.totalEnemies} enemies await!`, 'system');
+    // Spawn POIs
+    spawnPointsOfInterest();
+    
+    // Generate room descriptions
+    gameState.dungeon.roomDescriptions = [];
+    gameState.dungeon.exploredRooms = new Set();
+    for (let i = 0; i < dungeonInfo.rooms.length; i++) {
+        gameState.dungeon.roomDescriptions.push(proceduralGen.generateRoomDescription());
+    }
+    
+    // PROCEDURAL: Add environmental storytelling
+    const envStory = proceduralGen.generateEnvironmentalStory();
+    gameState.dungeon.environmentalStory = envStory;
+    
+    addMessage(`Entering ${dungeonTheme.name} - Level ${level}...`, 'system');
+    addMessage(dungeonTheme.desc, 'system');
+    addMessage(envStory.sight, 'system');
     if (level % GAME_CONFIG.bossEveryNLevels === 0) {
         addMessage('A powerful BOSS guards this level!', 'combat');
     }
@@ -918,7 +1455,10 @@ function updateShopUI() {
     
     if (gameState.showShop && gameState.currentLocation === 'town') {
         shopPanel.style.display = 'block';
-        if (shopBackdrop) shopBackdrop.style.display = 'block';
+        if (shopBackdrop) {
+            shopBackdrop.style.display = 'block';
+            shopBackdrop.style.pointerEvents = 'auto';
+        }
         
         // Update upgrade buttons
         for (const [key, upgrade] of Object.entries(SHOP_UPGRADES)) {
@@ -933,8 +1473,159 @@ function updateShopUI() {
         }
     } else {
         shopPanel.style.display = 'none';
-        if (shopBackdrop) shopBackdrop.style.display = 'none';
+        if (shopBackdrop) {
+            shopBackdrop.style.display = 'none';
+            shopBackdrop.style.pointerEvents = 'none';
+        }
     }
+}
+
+// ============================================
+// CRAFTING SYSTEM
+// ============================================
+
+function toggleCrafting() {
+    const craftingPanel = document.getElementById('crafting-panel');
+    const craftingBackdrop = document.getElementById('crafting-backdrop');
+    const isVisible = craftingPanel.style.display === 'block';
+    
+    craftingPanel.style.display = isVisible ? 'none' : 'block';
+    if (craftingBackdrop) {
+        craftingBackdrop.style.display = isVisible ? 'none' : 'block';
+        craftingBackdrop.style.pointerEvents = isVisible ? 'none' : 'auto';
+    }
+    
+    if (!isVisible) {
+        updateCraftingUI();
+    }
+}
+
+function updateCraftingUI() {
+    const materialsGrid = document.getElementById('materials-grid');
+    const recipesGrid = document.getElementById('recipes-grid');
+    
+    // Display materials
+    materialsGrid.innerHTML = '';
+    const materialEntries = Object.entries(gameState.craftingMaterials);
+    if (materialEntries.length === 0) {
+        materialsGrid.innerHTML = '<div class="no-materials">No materials yet. Defeat bosses to collect!</div>';
+    } else {
+        for (const [name, count] of materialEntries) {
+            const materialInfo = Object.values(BOSS_MATERIALS).find(m => m.name === name);
+            if (materialInfo) {
+                const div = document.createElement('div');
+                div.className = 'material-item';
+                div.innerHTML = `
+                    <div class="material-icon">${materialInfo.icon}</div>
+                    <div class="material-name">${name}</div>
+                    <div class="material-count">×${count}</div>
+                `;
+                div.title = materialInfo.description;
+                materialsGrid.appendChild(div);
+            }
+        }
+    }
+    
+    // Display recipes
+    recipesGrid.innerHTML = '';
+    for (const recipe of RADIANT_RECIPES) {
+        const div = document.createElement('div');
+        div.className = 'recipe-item';
+        
+        // Check if player has enough materials
+        let canCraft = true;
+        let materialsHTML = '';
+        for (const [matName, matCount] of Object.entries(recipe.materials)) {
+            const hasCount = gameState.craftingMaterials[matName] || 0;
+            const hasEnough = hasCount >= matCount;
+            canCraft = canCraft && hasEnough;
+            const materialInfo = Object.values(BOSS_MATERIALS).find(m => m.name === matName);
+            const color = hasEnough ? '#4caf50' : '#ff4444';
+            materialsHTML += `<div style="color: ${color};">${materialInfo?.icon || '?'} ${matName}: ${hasCount}/${matCount}</div>`;
+        }
+        
+        div.innerHTML = `
+            <div class="recipe-header">
+                <div class="recipe-icon">${recipe.icon}</div>
+                <div class="recipe-name rarity-radiant">${recipe.name}</div>
+            </div>
+            <div class="recipe-description">${recipe.description}</div>
+            <div class="recipe-stats">
+                ${Object.entries(recipe.stats).map(([stat, val]) => {
+                    const statName = stat === 'attack' ? 'Attack' : 
+                                   stat === 'defense' ? 'Defense' : 
+                                   stat === 'maxHp' ? 'Max HP' : 
+                                   stat === 'maxMana' ? 'Max Mana' : 
+                                   stat === 'speed' ? 'Speed' : 
+                                   stat === 'lifeSteal' ? 'Life Steal' : 
+                                   stat === 'fireDamage' ? 'Fire Damage' : stat;
+                    const value = stat === 'lifeSteal' || stat === 'fireDamage' ? `${(val * 100).toFixed(0)}%` : val;
+                    return `+${value} ${statName}`;
+                }).join(', ')}
+            </div>
+            <div class="recipe-materials">${materialsHTML}</div>
+            <button class="craft-item-btn" ${!canCraft ? 'disabled' : ''} onclick="craftItem('${recipe.id}')">${canCraft ? '🔨 Craft' : '❌ Insufficient Materials'}</button>
+        `;
+        
+        recipesGrid.appendChild(div);
+    }
+}
+
+function craftItem(recipeId) {
+    const recipe = RADIANT_RECIPES.find(r => r.id === recipeId);
+    if (!recipe) return;
+    
+    // Check materials
+    for (const [matName, matCount] of Object.entries(recipe.materials)) {
+        const hasCount = gameState.craftingMaterials[matName] || 0;
+        if (hasCount < matCount) {
+            addMessage('Insufficient materials!', 'system');
+            return;
+        }
+    }
+    
+    // Check inventory space
+    const itemCount = gameState.inventory.filter(i => i !== null).length;
+    if (itemCount >= 28) {
+        addMessage('Inventory full!', 'system');
+        return;
+    }
+    
+    // Consume materials
+    for (const [matName, matCount] of Object.entries(recipe.materials)) {
+        gameState.craftingMaterials[matName] -= matCount;
+        if (gameState.craftingMaterials[matName] <= 0) {
+            delete gameState.craftingMaterials[matName];
+        }
+    }
+    
+    // Create radiant item
+    const item = {
+        id: Date.now() + Math.random(),
+        name: recipe.name,
+        type: recipe.type,
+        slot: recipe.type === 'weapon' ? 'weapon' : 
+              recipe.type === 'helmet' ? 'helmet' : 
+              recipe.type === 'armor' ? 'armor' : 
+              recipe.type === 'shield' ? 'shield' : 
+              recipe.type === 'amulet' ? 'amulet' : recipe.type,
+        rarity: 'radiant',
+        icon: recipe.icon,
+        stats: { ...recipe.stats },
+        sellPrice: 10000,
+        level: gameState.dungeonLevel
+    };
+    
+    // Add to inventory
+    const emptySlot = gameState.inventory.findIndex(i => i === null);
+    if (emptySlot !== -1) {
+        gameState.inventory[emptySlot] = item;
+    }
+    
+    addMessage(`✨ Crafted ${recipe.name}!`, 'legendary');
+    createParticles(400, 300, '#ff1493', 30);
+    updateCraftingUI();
+    updateInventoryUI();
 }
 
 // ============================================
@@ -958,14 +1649,38 @@ function generateRarity(dungeonLevel = 1, guaranteed = null) {
 }
 
 function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) {
+    // Chance for set items (5% base, increases with dungeon level)
+    const setChance = Math.min(0.05 + (dungeonLevel * 0.005), 0.25); // Max 25% at high levels
+    
+    if (!forcedRarity && Math.random() < setChance) {
+        // Try to generate a set item
+        const setKeys = Object.keys(ITEM_SETS);
+        const randomSet = randomChoice(setKeys);
+        const set = ITEM_SETS[randomSet];
+        
+        // Choose a random piece from the set
+        const randomPiece = randomChoice(set.pieces);
+        
+        // Check if forced type matches or if no type is forced
+        if (!forcedType || forcedType === randomPiece) {
+            const setItem = generateSetItem(randomSet, randomPiece, dungeonLevel);
+            if (setItem) {
+                return setItem;
+            }
+        }
+    }
+    
     const typeKeys = Object.keys(ITEM_TYPES);
     const type = forcedType || randomChoice(typeKeys);
     const itemType = ITEM_TYPES[type];
     const rarity = forcedRarity || generateRarity(dungeonLevel);
     const rarityData = RARITIES[rarity];
     
-    const prefix = randomChoice(RARITY_PREFIXES[rarity]);
-    const baseName = randomChoice(itemType.names);
+    // PROCEDURAL: Generate item name
+    const proceduralItem = proceduralGen.generateProceduralItem(type, itemType, rarityData.name);
+    const itemName = proceduralItem.proceduralName;
+    const baseName = proceduralItem.baseName;
+    const flavorText = proceduralItem.flavorText;
     
     // Scale stats with dungeon level
     const levelScale = 1 + (dungeonLevel - 1) * 0.1;
@@ -1006,7 +1721,9 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
     
     return {
         id: Date.now() + Math.random(),
-        name: `${prefix} ${baseName}`,
+        name: itemName, // Use procedural name
+        baseName: baseName, // Keep base name for reference
+        flavorText: flavorText, // Add flavor text
         type: type,
         slot: itemType.slot,
         icon: itemType.icon,
@@ -1023,6 +1740,343 @@ function generatePotion() {
         potionType: 'health',
         ...POTION_TYPES.health
     };
+}
+
+// ============================================
+// SET ITEM SYSTEM
+// ============================================
+
+function generateSetItem(setName, itemType, dungeonLevel = 1) {
+    const set = ITEM_SETS[setName];
+    if (!set || !set.pieces.includes(itemType)) {
+        return null;
+    }
+    
+    const rarityData = RARITIES[set.rarity];
+    const itemTypeData = ITEM_TYPES[itemType];
+    const setStats = set.itemStats[itemType];
+    
+    // Level scaling
+    const levelScale = 1 + (dungeonLevel - 1) * 0.1;
+    
+    const stats = {};
+    for (const [stat, value] of Object.entries(setStats)) {
+        if (stat === 'speed') {
+            stats[stat] = value;
+        } else {
+            stats[stat] = Math.floor(value * levelScale);
+        }
+    }
+    
+    return {
+        id: Date.now() + Math.random(),
+        name: `${set.name} - ${itemTypeData.names[0]}`,
+        type: itemType,
+        slot: itemTypeData.slot,
+        icon: itemTypeData.icon,
+        rarity: set.rarity,
+        stats: stats,
+        sellPrice: Math.floor(500 * rarityData.statMultiplier * levelScale),
+        isSetItem: true,
+        setName: setName,
+        setInfo: set.name,
+        flavorText: `Part of the ${set.name} set`
+    };
+}
+
+function calculateSetBonuses() {
+    // Reset set tracking
+    gameState.sets.equipped = {};
+    gameState.sets.bonusesActive = [];
+    
+    // Count equipped set pieces
+    for (const slot in gameState.player.equipment) {
+        const item = gameState.player.equipment[slot];
+        if (item && item.isSetItem) {
+            if (!gameState.sets.equipped[item.setName]) {
+                gameState.sets.equipped[item.setName] = [];
+            }
+            gameState.sets.equipped[item.setName].push(item);
+        }
+    }
+    
+    // Apply set bonuses
+    for (const setName in gameState.sets.equipped) {
+        const equippedPieces = gameState.sets.equipped[setName];
+        const set = ITEM_SETS[setName];
+        const pieceCount = equippedPieces.length;
+        
+        // Check each bonus tier
+        for (const [requiredPieces, bonus] of Object.entries(set.bonuses)) {
+            if (pieceCount >= parseInt(requiredPieces)) {
+                gameState.sets.bonusesActive.push({
+                    setName: set.name,
+                    description: bonus.description,
+                    stats: bonus.stats,
+                    requiredPieces: requiredPieces
+                });
+            }
+        }
+    }
+}
+
+function getActiveSets() {
+    const activeSets = [];
+    for (const setName in gameState.sets.equipped) {
+        const equippedPieces = gameState.sets.equipped[setName];
+        const set = ITEM_SETS[setName];
+        activeSets.push({
+            name: set.name,
+            pieces: equippedPieces.length,
+            total: set.pieces.length
+        });
+    }
+    return activeSets;
+}
+
+// ============================================
+// POINTS OF INTEREST
+// ============================================
+
+function spawnPointsOfInterest() {
+    gameState.dungeon.pointsOfInterest = [];
+    const level = gameState.dungeonLevel;
+    const rooms = gameState.dungeon.rooms;
+    
+    // Spawn 1-3 POIs per dungeon
+    const poiCount = randomRange(1, Math.min(3, Math.floor(level / 3) + 1));
+    const poiTypes = Object.keys(POI_TYPES);
+    
+    for (let i = 0; i < poiCount && i < rooms.length - 2; i++) {
+        // Don't spawn in first or last room
+        const roomIndex = randomRange(1, rooms.length - 2);
+        const room = rooms[roomIndex];
+        const poiType = randomChoice(poiTypes);
+        const poiData = POI_TYPES[poiType];
+        
+        const x = (room.x + Math.floor(room.w / 2)) * GAME_CONFIG.tileSize;
+        const y = (room.y + Math.floor(room.h / 2)) * GAME_CONFIG.tileSize;
+        
+        gameState.dungeon.pointsOfInterest.push({
+            id: Date.now() + Math.random(),
+            type: poiType,
+            ...poiData,
+            x: x,
+            y: y,
+            used: false,
+            lastUseTime: 0
+        });
+    }
+}
+
+function interactWithPOI(poi) {
+    const now = Date.now();
+    
+    // Check cooldown
+    if (poi.cooldown > 0 && now - poi.lastUseTime < poi.cooldown) {
+        const remainingTime = Math.ceil((poi.cooldown - (now - poi.lastUseTime)) / 1000);
+        addMessage(`${poi.name} is recharging (${remainingTime}s remaining)`, 'system');
+        return;
+    }
+    
+    // Check one-time use
+    if (poi.oneTimeUse && poi.used) {
+        addMessage(`${poi.name} has already been used`, 'system');
+        return;
+    }
+    
+    // Apply POI effect
+    switch (poi.effect) {
+        case 'buff':
+            const buff = randomChoice(poi.buffs);
+            gameState.player.buffs.push({
+                ...buff,
+                startTime: now,
+                endTime: now + buff.duration
+            });
+            addMessage(`${poi.name}: ${buff.name} activated!`, 'loot');
+            recalculateStats();
+            break;
+            
+        case 'heal':
+            const healAmount = Math.floor(gameState.player.maxHp * poi.healAmount);
+            gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + healAmount);
+            addMessage(`${poi.name}: Restored ${healAmount} HP!`, 'loot');
+            createParticles(poi.x, poi.y, '#00ff00', 15);
+            break;
+            
+        case 'loot':
+            const goldAmount = randomRange(poi.lootTable.gold[0], poi.lootTable.gold[1]);
+            gameState.player.gold += goldAmount;
+            const itemCount = randomRange(poi.lootTable.itemCount[0], poi.lootTable.itemCount[1]);
+            for (let i = 0; i < itemCount; i++) {
+                const item = generateItem(null, poi.lootTable.guaranteedRarity, gameState.dungeonLevel);
+                gameState.loot.push({
+                    ...item,
+                    x: poi.x + randomRange(-30, 30),
+                    y: poi.y + randomRange(-30, 30)
+                });
+            }
+            addMessage(`${poi.name}: Found ${goldAmount} gold and ${itemCount} items!`, 'loot');
+            break;
+            
+        case 'sacrifice':
+            const hpCost = Math.floor(gameState.player.maxHp * poi.costHpPercent);
+            if (gameState.player.hp <= hpCost) {
+                addMessage(`Not enough HP to use ${poi.name}!`, 'system');
+                return;
+            }
+            gameState.player.hp -= hpCost;
+            const sacrificeGold = randomRange(poi.reward.gold[0], poi.reward.gold[1]);
+            gameState.player.gold += sacrificeGold;
+            gameState.player.exp += poi.reward.exp;
+            gameState.player.buffs.push({
+                ...poi.reward.buff,
+                startTime: now,
+                endTime: now + poi.reward.buff.duration
+            });
+            addMessage(`${poi.name}: Sacrificed ${hpCost} HP for power!`, 'combat');
+            createParticles(poi.x, poi.y, '#8b0000', 20);
+            recalculateStats();
+            break;
+            
+        case 'transport':
+            const randomRoom = randomChoice(gameState.dungeon.rooms);
+            gameState.player.worldX = (randomRoom.x + Math.floor(randomRoom.w / 2)) * GAME_CONFIG.tileSize;
+            gameState.player.worldY = (randomRoom.y + Math.floor(randomRoom.h / 2)) * GAME_CONFIG.tileSize;
+            addMessage(`${poi.name}: Teleported to a distant chamber!`, 'system');
+            createParticles(poi.x, poi.y, '#00ffff', 25);
+            break;
+            
+        case 'setItem':
+            const setKeys = Object.keys(ITEM_SETS);
+            const randomSet = randomChoice(setKeys);
+            const set = ITEM_SETS[randomSet];
+            const randomPiece = randomChoice(set.pieces);
+            const setItem = generateSetItem(randomSet, randomPiece, gameState.dungeonLevel);
+            if (setItem) {
+                gameState.loot.push({
+                    ...setItem,
+                    x: poi.x,
+                    y: poi.y
+                });
+                addMessage(`${poi.name}: Forged ${setItem.name}!`, 'loot');
+                createParticles(poi.x, poi.y, '#ff6600', 30);
+            }
+            break;
+    }
+    
+    // Mark as used
+    poi.used = true;
+    poi.lastUseTime = now;
+    updateUI();
+}
+
+// ============================================
+// SAVE / LOAD SYSTEM
+// ============================================
+
+function saveGame() {
+    const saveData = {
+        version: '2.0',
+        timestamp: Date.now(),
+        player: {
+            level: gameState.player.level,
+            exp: gameState.player.exp,
+            expToLevel: gameState.player.expToLevel,
+            gold: gameState.player.gold,
+            maxHp: gameState.player.maxHp,
+            maxMana: gameState.player.maxMana,
+            baseAttack: gameState.player.baseAttack,
+            baseDefense: gameState.player.baseDefense,
+            baseSpeed: gameState.player.baseSpeed,
+            equipment: gameState.player.equipment,
+            upgrades: gameState.player.upgrades
+        },
+        inventory: gameState.inventory,
+        potions: gameState.potions,
+        dungeonLevel: gameState.dungeonLevel,
+        highestLevelReached: gameState.dungeon.highestLevelReached,
+        sets: gameState.sets,
+        craftingMaterials: gameState.craftingMaterials
+    };
+    
+    try {
+        localStorage.setItem('darkRealmsRPG_save', JSON.stringify(saveData));
+        addMessage('Game saved successfully!', 'system');
+        return true;
+    } catch (error) {
+        console.error('Save failed:', error);
+        addMessage('Failed to save game!', 'system');
+        return false;
+    }
+}
+
+function loadGame() {
+    try {
+        const saveDataStr = localStorage.getItem('darkRealmsRPG_save');
+        if (!saveDataStr) {
+            addMessage('No save data found!', 'system');
+            return false;
+        }
+        
+        const saveData = JSON.parse(saveDataStr);
+        
+        // Restore player data
+        gameState.player.level = saveData.player.level;
+        gameState.player.exp = saveData.player.exp;
+        gameState.player.expToLevel = saveData.player.expToLevel;
+        gameState.player.gold = saveData.player.gold;
+        gameState.player.maxHp = saveData.player.maxHp;
+        gameState.player.maxMana = saveData.player.maxMana;
+        gameState.player.baseAttack = saveData.player.baseAttack;
+        gameState.player.baseDefense = saveData.player.baseDefense;
+        gameState.player.baseSpeed = saveData.player.baseSpeed;
+        gameState.player.equipment = saveData.player.equipment || {};
+        gameState.player.upgrades = saveData.player.upgrades || {};
+        
+        // Restore inventory and potions
+        gameState.inventory = saveData.inventory || [];
+        gameState.potions = saveData.potions || { health: 5, maxHealth: 10 };
+        
+        // Restore dungeon progress
+        gameState.dungeonLevel = saveData.dungeonLevel || 1;
+        gameState.dungeon.highestLevelReached = saveData.highestLevelReached || 1;
+        
+        // Restore sets
+        gameState.sets = saveData.sets || { equipped: {}, bonusesActive: [] };
+        
+        // Restore crafting materials
+        gameState.craftingMaterials = saveData.craftingMaterials || {};
+        
+        // Recalculate stats
+        recalculateStats();
+        calculateSetBonuses();
+        
+        // Make sure we're in town
+        enterTown();
+        
+        addMessage('Game loaded successfully!', 'system');
+        updateUI();
+        return true;
+    } catch (error) {
+        console.error('Load failed:', error);
+        addMessage('Failed to load game!', 'system');
+        return false;
+    }
+}
+
+function deleteSave() {
+    if (confirm('Are you sure you want to delete your save? This cannot be undone!')) {
+        localStorage.removeItem('darkRealmsRPG_save');
+        addMessage('Save deleted!', 'system');
+        // Reload page to reset game
+        location.reload();
+    }
+}
+
+function hasSaveData() {
+    return localStorage.getItem('darkRealmsRPG_save') !== null;
 }
 
 // ============================================
@@ -1063,12 +2117,27 @@ function playerAttack() {
     for (const monster of gameState.monsters) {
         const dist = distance(gameState.player.worldX, gameState.player.worldY, monster.x, monster.y);
         if (dist <= gameState.player.attackRange) {
-            const damage = Math.max(1, gameState.player.attack - Math.floor(monster.baseDamage * 0.1));
+            let damage = Math.max(1, gameState.player.attack - Math.floor(monster.baseDamage * 0.1));
+            
+            // Apply fire damage bonus if present
+            if (gameState.player.fireDamage) {
+                damage = Math.floor(damage * (1 + gameState.player.fireDamage));
+            }
+            
             const finalDamage = Math.floor(damage * randomFloat(0.8, 1.2));
             monster.hp -= finalDamage;
             
+            // Life steal
+            if (gameState.player.lifeSteal && gameState.player.lifeSteal > 0) {
+                const lifeStealAmount = Math.floor(finalDamage * gameState.player.lifeSteal);
+                gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + lifeStealAmount);
+                if (lifeStealAmount > 0) {
+                    createDamageNumber(gameState.player.worldX, gameState.player.worldY, `+${lifeStealAmount}`, '#00ff00');
+                }
+            }
+            
             // Show damage number
-            createDamageNumber(monster.x, monster.y, finalDamage, '#ff6b6b');
+            createDamageNumber(monster.x, monster.y, finalDamage, gameState.player.fireDamage ? '#ff6600' : '#ff6b6b');
             
             // Create hit particles
             createParticles(monster.x, monster.y, monster.color, 5);
@@ -1145,6 +2214,30 @@ function killMonster(monster) {
     if (Math.random() < monster.lootChance || isBoss) {
         const guaranteedRarity = isBoss ? monster.guaranteedRarity : null;
         dropLoot(monster.x, monster.y, guaranteedRarity);
+    }
+    
+    // Drop boss crafting materials (1% chance)
+    if (isBoss && BOSS_MATERIALS[monster.baseName]) {
+        const material = BOSS_MATERIALS[monster.baseName];
+        if (Math.random() < material.dropChance) {
+            // Add to crafting materials inventory
+            if (!gameState.craftingMaterials[material.name]) {
+                gameState.craftingMaterials[material.name] = 0;
+            }
+            gameState.craftingMaterials[material.name]++;
+            addMessage(`${material.icon} Obtained ${material.name}!`, 'rare');
+            createParticles(monster.x, monster.y, '#ff1493', 20);
+            
+            // Visual notification
+            gameState.floatingTexts.push({
+                x: monster.x,
+                y: monster.y - 30,
+                text: material.icon + ' ' + material.name,
+                color: '#ff1493',
+                life: 2.0,
+                vy: -1.5
+            });
+        }
     }
     
     // DIABLO FEATURE 6: Health globe drops (50% chance)
@@ -1276,59 +2369,77 @@ function playerDeath() {
 // ============================================
 
 function addToInventory(item) {
-    if (gameState.inventory.length >= gameState.maxInventory) {
-        addMessage('Inventory full!', 'system');
-        return false;
+    // Find first empty slot
+    for (let i = 0; i < gameState.maxInventory; i++) {
+        if (!gameState.inventory[i]) {
+            gameState.inventory[i] = item;
+            updateInventoryUI();
+            return true;
+        }
     }
-    gameState.inventory.push(item);
-    updateInventoryUI();
-    return true;
+    addMessage('Inventory full!', 'system');
+    return false;
 }
 
 function removeFromInventory(index) {
-    if (index >= 0 && index < gameState.inventory.length) {
-        gameState.inventory.splice(index, 1);
+    if (index >= 0 && index < gameState.maxInventory) {
+        gameState.inventory[index] = null;
         updateInventoryUI();
     }
 }
 
 function equipItem(item, inventoryIndex) {
     const slot = item.slot;
-    const currentEquipped = gameState.player.equipment[slot];
-    
-    // Unequip current item if any
-    if (currentEquipped) {
-        if (gameState.inventory.length >= gameState.maxInventory) {
-            addMessage('Inventory full! Cannot swap equipment.', 'system');
-            return;
-        }
-        gameState.inventory.push(currentEquipped);
+
+    if (!slot) {
+        addMessage('Cannot equip this item - no slot defined', 'system');
+        return;
     }
-    
+
+    const currentEquipped = gameState.player.equipment[slot];
+
+    // Swap: put currently equipped item back into the inventory slot, or clear if none
+    if (currentEquipped) {
+        gameState.inventory[inventoryIndex] = currentEquipped;
+    } else {
+        gameState.inventory[inventoryIndex] = null;
+    }
+
     // Equip new item
     gameState.player.equipment[slot] = item;
-    removeFromInventory(inventoryIndex);
     
     recalculateStats();
+    calculateSetBonuses();
     updateEquipmentUI();
     updateInventoryUI();
     
     addMessage(`Equipped ${item.name}`, 'system');
+    console.log('Item equipped successfully');
 }
 
 function unequipItem(slot) {
     const item = gameState.player.equipment[slot];
     if (!item) return;
     
-    if (gameState.inventory.length >= gameState.maxInventory) {
+    // Find first empty inventory slot
+    let emptySlot = -1;
+    for (let i = 0; i < gameState.maxInventory; i++) {
+        if (!gameState.inventory[i]) {
+            emptySlot = i;
+            break;
+        }
+    }
+    
+    if (emptySlot === -1) {
         addMessage('Inventory full!', 'system');
         return;
     }
     
-    gameState.inventory.push(item);
+    gameState.inventory[emptySlot] = item;
     gameState.player.equipment[slot] = null;
     
     recalculateStats();
+    calculateSetBonuses();
     updateEquipmentUI();
     updateInventoryUI();
     
@@ -1355,6 +2466,8 @@ function recalculateStats() {
     p.speed = p.baseSpeed;
     let bonusHp = 0;
     let bonusMana = 0;
+    let lifeSteal = 0;
+    let fireDamage = 0;
     
     // Add equipment bonuses
     for (const item of Object.values(p.equipment)) {
@@ -1367,10 +2480,32 @@ function recalculateStats() {
         }
     }
     
+    // Calculate set bonuses
+    calculateSetBonuses();
+    
+    // Add set bonuses
+    for (const setBonus of gameState.sets.bonusesActive) {
+        if (setBonus.stats) {
+            p.attack += setBonus.stats.attack || 0;
+            p.defense += setBonus.stats.defense || 0;
+            p.speed += setBonus.stats.speed || 0;
+            bonusHp += setBonus.stats.maxHp || 0;
+            bonusMana += setBonus.stats.maxMana || 0;
+            lifeSteal += setBonus.stats.lifeSteal || 0;
+            fireDamage += setBonus.stats.fireDamage || 0;
+        }
+    }
+    
+    // Store special bonuses
+    p.lifeSteal = lifeSteal;
+    p.fireDamage = fireDamage;
+    
     // Add buff bonuses
     for (const buff of p.buffs) {
         if (buff.stat === 'attack') p.attack += buff.amount;
+        if (buff.stat === 'defense') p.defense += buff.amount;
         if (buff.stat === 'speed') p.speed += buff.amount;
+        if (buff.stat === 'maxHp') bonusHp += buff.amount;
     }
     
     // Update max HP/Mana (includes upgrade bonuses)
@@ -1521,6 +2656,7 @@ function renderMonsterSprite(ctx, monster, screenX, screenY) {
     const size = monster.size;
     const color = monster.color;
     const isBoss = monster.isBoss;
+    const seed = monster.spriteSeed || 0;
     
     ctx.save();
     ctx.translate(screenX, screenY - animOffset);
@@ -1535,53 +2671,59 @@ function renderMonsterSprite(ctx, monster, screenX, screenY) {
         ctx.shadowBlur = 20;
     }
     
-    // Draw different sprites based on monster name
-    switch (monster.name) {
+    // Draw different sprites based on monster baseName (not procedural name)
+    const baseName = monster.baseName || monster.name;
+    switch (baseName) {
         case 'Rat':
-            drawRatSprite(ctx, size, color);
+            drawRatSprite(ctx, size, color, seed);
             break;
         case 'Slime':
-            drawSlimeSprite(ctx, size, color, monster.animFrame);
+            drawSlimeSprite(ctx, size, color, monster.animFrame, seed);
             break;
         case 'Goblin':
         case 'Goblin King':
-            drawGoblinSprite(ctx, size, color, isBoss);
+            drawGoblinSprite(ctx, size, color, isBoss, seed);
             break;
         case 'Skeleton':
         case 'Skeleton Lord':
-            drawSkeletonSprite(ctx, size, color, isBoss);
+            drawSkeletonSprite(ctx, size, color, isBoss, seed);
             break;
         case 'Orc':
-            drawOrcSprite(ctx, size, color);
+            drawOrcSprite(ctx, size, color, seed);
             break;
         case 'Dark Mage':
-            drawMageSprite(ctx, size, color);
+            drawMageSprite(ctx, size, color, seed);
             break;
         case 'Troll':
-            drawTrollSprite(ctx, size, color);
+            drawTrollSprite(ctx, size, color, seed);
             break;
         case 'Demon':
         case 'Demon Lord':
-            drawDemonSprite(ctx, size, color, isBoss);
+            drawDemonSprite(ctx, size, color, isBoss, seed);
             break;
         case 'Dragon Whelp':
         case 'Elder Dragon':
         case 'Ancient Dragon':
-            drawDragonSprite(ctx, size, color, isBoss);
+            drawDragonSprite(ctx, size, color, isBoss, seed);
             break;
         default:
-            drawGenericMonsterSprite(ctx, size, color);
+            drawGenericMonsterSprite(ctx, size, color, seed);
     }
     
     ctx.shadowBlur = 0;
     ctx.restore();
 }
 
-function drawRatSprite(ctx, size, color) {
+function drawRatSprite(ctx, size, color, seed = 0) {
+    // Procedural variations based on seed
+    const earSize = 0.15 + (seed % 5) * 0.01;
+    const tailCurve = 0.3 + (seed % 7) * 0.05;
+    const bodyWidth = 0.8 + (seed % 4) * 0.05;
+    
     // Body - oval shape
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.ellipse(0, 0, size * 0.8, size * 0.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, size * bodyWidth, size * 0.5, 0, 0, Math.PI * 2);
     ctx.fill();
     
     // Head
@@ -1589,21 +2731,21 @@ function drawRatSprite(ctx, size, color) {
     ctx.ellipse(size * 0.5, -size * 0.1, size * 0.4, size * 0.35, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Ears
+    // Ears with variation
     ctx.beginPath();
-    ctx.arc(size * 0.4, -size * 0.4, size * 0.15, 0, Math.PI * 2);
+    ctx.arc(size * 0.4, -size * 0.4, size * earSize, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(size * 0.6, -size * 0.35, size * 0.15, 0, Math.PI * 2);
+    ctx.arc(size * 0.6, -size * 0.35, size * earSize, 0, Math.PI * 2);
     ctx.fill();
     
     // Inner ears - dark
     ctx.fillStyle = '#1a0010';
     ctx.beginPath();
-    ctx.arc(size * 0.4, -size * 0.4, size * 0.08, 0, Math.PI * 2);
+    ctx.arc(size * 0.4, -size * 0.4, size * (earSize - 0.07), 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(size * 0.6, -size * 0.35, size * 0.08, 0, Math.PI * 2);
+    ctx.arc(size * 0.6, -size * 0.35, size * (earSize - 0.07), 0, Math.PI * 2);
     ctx.fill();
     
     // Glowing red eyes
@@ -1615,12 +2757,12 @@ function drawRatSprite(ctx, size, color) {
     drawScarySmile(ctx, size, size * 0.05, 0.15, '#ff3333');
     ctx.restore();
     
-    // Tail
+    // Tail with procedural curve
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(-size * 0.6, 0);
-    ctx.quadraticCurveTo(-size * 0.9, -size * 0.3, -size, size * 0.2);
+    ctx.quadraticCurveTo(-size * 0.9, -size * tailCurve, -size, size * 0.2);
     ctx.stroke();
     
     // Legs
@@ -1631,30 +2773,38 @@ function drawRatSprite(ctx, size, color) {
     ctx.fillRect(size * 0.35, size * 0.3, size * 0.15, size * 0.2);
 }
 
-function drawSlimeSprite(ctx, size, color, animFrame) {
+function drawSlimeSprite(ctx, size, color, animFrame, seed = 0) {
+    // Procedural variations
+    const blobiness = 1 + (seed % 6) * 0.1;
+    const eyeSpacing = 0.25 + (seed % 8) * 0.03;
+    
     // Slime body - bouncy blob shape
     const squish = animFrame === 1 ? 0.15 : 0;
     
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.ellipse(0, size * 0.1, size * (1 + squish), size * (0.8 - squish), 0, 0, Math.PI * 2);
+    ctx.ellipse(0, size * 0.1, size * (blobiness + squish), size * (0.8 - squish), 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Dark highlight/shine
+    // Dark highlight/shine with variation
+    const shinePos = -0.3 + (seed % 5) * 0.1;
     ctx.fillStyle = 'rgba(0, 50, 0, 0.4)';
     ctx.beginPath();
-    ctx.ellipse(-size * 0.3, -size * 0.2, size * 0.25, size * 0.15, -0.5, 0, Math.PI * 2);
+    ctx.ellipse(size * shinePos, -size * 0.2, size * 0.25, size * 0.15, -0.5, 0, Math.PI * 2);
     ctx.fill();
     
-    // Glowing red eyes
-    drawGlowingEyes(ctx, size, -size * 0.25, size * 0.25, -size * 0.1, 0.1);
+    // Glowing red eyes with varied spacing
+    drawGlowingEyes(ctx, size, -size * eyeSpacing, size * eyeSpacing, -size * 0.1, 0.1);
     
     // Scary smile
     drawScarySmile(ctx, size, size * 0.25, 0.25, '#ff0000');
 }
 
-function drawGoblinSprite(ctx, size, color, isBoss) {
+function drawGoblinSprite(ctx, size, color, isBoss, seed = 0) {
     const scale = isBoss ? 1.3 : 1;
+    // Procedural variations
+    const earAngle = 0.5 + (seed % 6) * 0.1;
+    const noseSize = 0.08 + (seed % 4) * 0.02;
     
     // Body
     ctx.fillStyle = color;
@@ -1718,8 +2868,11 @@ function drawGoblinSprite(ctx, size, color, isBoss) {
     }
 }
 
-function drawSkeletonSprite(ctx, size, color, isBoss) {
+function drawSkeletonSprite(ctx, size, color, isBoss, seed = 0) {
     const boneColor = isBoss ? '#4a3a10' : color;
+    // Procedural variations
+    const ribCount = 3 + (seed % 3);
+    const skullSize = 0.35 + (seed % 5) * 0.02;
     
     // Ribcage/torso
     ctx.strokeStyle = boneColor;
@@ -1822,7 +2975,10 @@ function drawSkeletonSprite(ctx, size, color, isBoss) {
     }
 }
 
-function drawOrcSprite(ctx, size, color) {
+function drawOrcSprite(ctx, size, color, seed = 0) {
+    // Procedural variations
+    const tuskLength = 0.3 + (seed % 6) * 0.05;
+    const bodyBulk = 1.0 + (seed % 4) * 0.1;
     // Bulky body
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -1875,7 +3031,10 @@ function drawOrcSprite(ctx, size, color) {
     ctx.fillRect(size * 0.1, size * 0.5, size * 0.25, size * 0.35);
 }
 
-function drawMageSprite(ctx, size, color) {
+function drawMageSprite(ctx, size, color, seed = 0) {
+    // Procedural variations
+    const hatHeight = 0.8 + (seed % 7) * 0.1;
+    const orbGlow = 0.3 + (seed % 5) * 0.05;
     // Robe body
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -1941,7 +3100,10 @@ function drawMageSprite(ctx, size, color) {
     ctx.fill();
 }
 
-function drawTrollSprite(ctx, size, color) {
+function drawTrollSprite(ctx, size, color, seed = 0) {
+    // Procedural variations
+    const hunchAmount = 0.2 + (seed % 5) * 0.05;
+    const armLength = 0.6 + (seed % 6) * 0.05;
     // Large body
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -2001,8 +3163,11 @@ function drawTrollSprite(ctx, size, color) {
     ctx.fillRect(size * 0.1, size * 0.6, size * 0.3, size * 0.25);
 }
 
-function drawDemonSprite(ctx, size, color, isBoss) {
+function drawDemonSprite(ctx, size, color, isBoss, seed = 0) {
     const scale = isBoss ? 1.2 : 1;
+    // Procedural variations
+    const hornCurve = 0.4 + (seed % 7) * 0.05;
+    const wingSpan = 0.8 + (seed % 5) * 0.1;
     
     // Body
     ctx.fillStyle = color;
@@ -2078,8 +3243,11 @@ function drawDemonSprite(ctx, size, color, isBoss) {
     }
 }
 
-function drawDragonSprite(ctx, size, color, isBoss) {
+function drawDragonSprite(ctx, size, color, isBoss, seed = 0) {
     const scale = isBoss ? 1.3 : 1;
+    // Procedural variations
+    const neckLength = 0.7 + (seed % 6) * 0.1;
+    const spikeCount = 3 + (seed % 4);
     
     // Body
     ctx.fillStyle = color;
@@ -2208,7 +3376,11 @@ function drawDragonSprite(ctx, size, color, isBoss) {
     }
 }
 
-function drawGenericMonsterSprite(ctx, size, color) {
+function drawGenericMonsterSprite(ctx, size, color, seed = 0) {
+    // Procedural variations for generic monsters
+    const bodyShape = seed % 4;
+    const eyeGlow = 0.05 + (seed % 6) * 0.01;
+    const tentacles = seed % 2 === 0;
     // Generic humanoid monster - dark and scary
     ctx.fillStyle = color;
     
@@ -2596,8 +3768,27 @@ document.addEventListener('keydown', (e) => {
             usePotion();
             break;
         case 'KeyE':
-            // Interact - enter dungeon, go to next level, open shop
+            // Interact - enter dungeon, go to next level, open shop, use POI
             handleInteraction();
+            break;
+        case 'KeyF':
+            // Interact with POI
+            checkPOIInteraction();
+            break;
+        case 'KeyM':
+            // Toggle minimap
+            gameState.showMinimap = !gameState.showMinimap;
+            addMessage(gameState.showMinimap ? 'Minimap enabled' : 'Minimap disabled', 'system');
+            break;
+        case 'F5':
+            // Save game
+            e.preventDefault();
+            saveGame();
+            break;
+        case 'F9':
+            // Load game
+            e.preventDefault();
+            loadGame();
             break;
         case 'Escape':
             if (gameState.showShop) {
@@ -2646,6 +3837,13 @@ function handleInteraction() {
             toggleShop();
             return;
         }
+        
+        // Check if near forge
+        const distToForge = distance(p.worldX, p.worldY, gameState.town.forgeX, gameState.town.forgeY);
+        if (distToForge < 80) {
+            toggleCrafting();
+            return;
+        }
     } else if (gameState.currentLocation === 'dungeon') {
         // Check if at dungeon entrance (return to town)
         const entranceX = gameState.dungeon.entrance.x * GAME_CONFIG.tileSize;
@@ -2667,6 +3865,19 @@ function handleInteraction() {
                 return;
             }
             goToNextLevel();
+            return;
+        }
+    }
+}
+
+function checkPOIInteraction() {
+    if (gameState.currentLocation !== 'dungeon') return;
+    
+    const p = gameState.player;
+    for (const poi of gameState.dungeon.pointsOfInterest) {
+        const dist = distance(p.worldX, p.worldY, poi.x, poi.y);
+        if (dist < 60) {
+            interactWithPOI(poi);
             return;
         }
     }
@@ -2725,30 +3936,98 @@ function updateUI() {
             enemyCountEl.style.display = 'none';
         }
     }
+    
+    // Update set bonuses display
+    // Set bonuses UI removed - info now shown in item tooltips
+    
+    // Update inventory and equipment UI
+    updateInventoryUI();
+    updateEquipmentUI();
 }
 
 function updateInventoryUI() {
     const grid = document.getElementById('inventory-grid');
-    grid.innerHTML = '';
+    if (!grid) {
+        console.error('inventory-grid element not found!');
+        return;
+    }
     
+    grid.innerHTML = '';
+
     for (let i = 0; i < gameState.maxInventory; i++) {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot';
         slot.dataset.index = i;
-        
+
         const item = gameState.inventory[i];
         if (item) {
             slot.classList.add('has-item', `rarity-${item.rarity}`);
             slot.textContent = item.icon;
+
+            // Minimal listeners: tooltip on hover, click to handle
             slot.addEventListener('mouseenter', (e) => showTooltip(item, e));
             slot.addEventListener('mouseleave', hideTooltip);
             slot.addEventListener('click', () => handleInventoryClick(i));
         }
-        
+
         grid.appendChild(slot);
     }
+
+    const itemCount = gameState.inventory.filter(item => item !== null).length;
+    const countEl = document.getElementById('inventory-count');
+    if (countEl) countEl.textContent = `(${itemCount}/${gameState.maxInventory})`;
+
+    // Update materials count
+    updateMaterialsUI();
+}
+
+function updateMaterialsUI() {
+    const grid = document.getElementById('materials-backpack-grid');
+    const materialCount = Object.keys(gameState.craftingMaterials).length;
+    document.getElementById('materials-count').textContent = `(${materialCount})`;
     
-    document.getElementById('inventory-count').textContent = `(${gameState.inventory.length}/${gameState.maxInventory})`;
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    const materialEntries = Object.entries(gameState.craftingMaterials);
+    
+    if (materialEntries.length === 0) {
+        grid.innerHTML = '<div class="no-materials-backpack">No materials collected yet.<br>Defeat bosses to obtain crafting materials!</div>';
+    } else {
+        for (const [name, count] of materialEntries) {
+            const materialInfo = Object.values(BOSS_MATERIALS).find(m => m.name === name);
+            if (materialInfo) {
+                const div = document.createElement('div');
+                div.className = 'material-backpack-item';
+                div.innerHTML = `
+                    <div class="material-backpack-icon">${materialInfo.icon}</div>
+                    <div class="material-backpack-name">${name}</div>
+                    <div class="material-backpack-count">×${count}</div>
+                `;
+                div.title = materialInfo.description;
+                grid.appendChild(div);
+            }
+        }
+    }
+}
+
+function switchInventoryTab(tab) {
+    const itemsTab = document.getElementById('inventory-items-tab');
+    const materialsTab = document.getElementById('inventory-materials-tab');
+    const tabs = document.querySelectorAll('.inventory-tab');
+    
+    tabs.forEach(t => t.classList.remove('active'));
+    
+    if (tab === 'items') {
+        itemsTab.style.display = 'block';
+        materialsTab.style.display = 'none';
+        tabs[0].classList.add('active');
+    } else {
+        itemsTab.style.display = 'none';
+        materialsTab.style.display = 'block';
+        tabs[1].classList.add('active');
+        updateMaterialsUI(); // Refresh materials when switching to tab
+    }
 }
 
 function updateEquipmentUI() {
@@ -2782,9 +4061,8 @@ function updateEquipmentUI() {
 function handleInventoryClick(index) {
     const item = gameState.inventory[index];
     if (!item) return;
-    
+
     if (item.type === 'potion') {
-        // Add health potion to inventory
         if (gameState.potions.health < gameState.potions.maxHealth) {
             gameState.potions.health++;
             removeFromInventory(index);
@@ -2794,7 +4072,7 @@ function handleInventoryClick(index) {
             addMessage('Potion inventory full!', 'system');
         }
     } else {
-        // Equip item
+        console.log('handleInventoryClick triggered for slot', index, 'item', item && item.name);
         equipItem(item, index);
     }
 }
@@ -2825,7 +4103,9 @@ function showTooltip(item, event) {
     nameEl.textContent = item.name;
     nameEl.className = `tooltip-name rarity-${item.rarity}`;
     
-    typeEl.textContent = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+    // Add set item indicator
+    const setIndicator = item.setName ? ' (Set Item)' : '';
+    typeEl.textContent = item.type.charAt(0).toUpperCase() + item.type.slice(1) + setIndicator;
     rarityEl.textContent = RARITIES[item.rarity].name;
     rarityEl.style.color = RARITIES[item.rarity].color;
     
@@ -2906,7 +4186,45 @@ function showTooltip(item, event) {
         legendary: 'A weapon of great renown.',
         mythic: 'Forged by the gods themselves.'
     };
-    descEl.textContent = flavorTexts[item.rarity];
+    
+    // Show set bonuses if this is a set item
+    if (item.setName && ITEM_SETS[item.setName]) {
+        const setInfo = ITEM_SETS[item.setName];
+        
+        // Count equipped pieces from this set
+        let equippedCount = 0;
+        for (const slot in gameState.player.equipment) {
+            const equipped = gameState.player.equipment[slot];
+            if (equipped && equipped.setName === item.setName) {
+                equippedCount++;
+            }
+        }
+        
+        // If hovering over an unequipped item, assume it would be equipped
+        const isEquipped = item.slot && gameState.player.equipment[item.slot] === item;
+        const projectedCount = isEquipped ? equippedCount : equippedCount + 1;
+        
+        // Build set bonus display
+        let setBonusHTML = `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #555;">`;
+        setBonusHTML += `<div style="color: #ffd700; font-weight: bold;">${setInfo.name} (${projectedCount}/5 pieces)</div>`;
+        
+        // Show bonuses at 2, 3, and 5 pieces
+        const milestones = [2, 3, 5];
+        for (const milestone of milestones) {
+            const bonus = setInfo.bonuses[milestone];
+            if (bonus) {
+                const isActive = projectedCount >= milestone;
+                const color = isActive ? '#4caf50' : '#666';
+                const checkmark = isActive ? '✓ ' : '  ';
+                setBonusHTML += `<div style="color: ${color}; margin-top: 4px;">${checkmark}(${milestone}) ${bonus.description}</div>`;
+            }
+        }
+        
+        setBonusHTML += `</div>`;
+        descEl.innerHTML = flavorTexts[item.rarity] + setBonusHTML;
+    } else {
+        descEl.textContent = flavorTexts[item.rarity];
+    }
     
     if (item.type !== 'potion') {
         actionsEl.textContent = `Click to equip | Sell: ${item.sellPrice} gold`;
@@ -2915,6 +4233,8 @@ function showTooltip(item, event) {
     }
     
     tooltip.style.display = 'block';
+    tooltip.style.visibility = 'visible';
+    tooltip.style.opacity = '1';
     
     // Position tooltip
     const x = event.clientX + 15;
@@ -2924,7 +4244,8 @@ function showTooltip(item, event) {
 }
 
 function hideTooltip() {
-    document.getElementById('item-tooltip').style.display = 'none';
+    const tooltip = document.getElementById('item-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
 }
 
 // ============================================
@@ -3083,6 +4404,25 @@ function update(deltaTime) {
     
     // Monster AI (only in dungeon)
     if (gameState.currentLocation === 'dungeon') {
+        // PROCEDURAL: Check for room exploration
+        const playerTileX = Math.floor(p.worldX / GAME_CONFIG.tileSize);
+        const playerTileY = Math.floor(p.worldY / GAME_CONFIG.tileSize);
+        
+        for (let i = 0; i < gameState.dungeon.rooms.length; i++) {
+            const room = gameState.dungeon.rooms[i];
+            if (playerTileX >= room.x && playerTileX < room.x + room.w &&
+                playerTileY >= room.y && playerTileY < room.y + room.h) {
+                // Player is in this room
+                if (!gameState.dungeon.exploredRooms.has(i)) {
+                    gameState.dungeon.exploredRooms.add(i);
+                    const roomDesc = gameState.dungeon.roomDescriptions[i];
+                    addMessage(`You enter ${roomDesc.description}...`, 'system');
+                    addMessage(roomDesc.flavor, 'system');
+                }
+                break;
+            }
+        }
+        
         for (const monster of gameState.monsters) {
             // Move towards player if close enough
             const dx = p.worldX - monster.x;
@@ -3246,11 +4586,8 @@ function render() {
         ctx.globalAlpha = 1;
     }
     
-    // Draw HUD overlay
-    renderHUD();
-    
     // Draw minimap
-    if (gameState.currentLocation === 'dungeon') {
+    if (gameState.currentLocation === 'dungeon' && gameState.showMinimap) {
         renderMinimap();
     }
 }
@@ -3280,6 +4617,28 @@ function renderTown() {
     ctx.fillStyle = '#888';
     ctx.font = '12px Arial';
     ctx.fillText('Press E to open', 400, 200);
+    
+    // Radiant Forge building - mystical pink/purple theme
+    ctx.fillStyle = '#2a1030';
+    ctx.fillRect(140, 80, 160, 100);
+    ctx.fillStyle = '#3a1545';
+    ctx.fillRect(200, 140, 40, 40); // door
+    
+    // Glowing forge anvil symbol
+    ctx.fillStyle = '#ff1493';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ff1493';
+    ctx.font = 'bold 20px Arial';
+    ctx.fillText('🔨', 220, 120);
+    ctx.shadowBlur = 0;
+    
+    ctx.fillStyle = '#ff1493';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚒️ FORGE', 220, 60);
+    ctx.fillStyle = '#888';
+    ctx.font = '12px Arial';
+    ctx.fillText('Press E to open', 220, 200);
     
     // Dungeon entrance - darker, more ominous
     ctx.fillStyle = '#0a0a0a';
@@ -3323,6 +4682,14 @@ function renderTown() {
         ctx.font = 'bold 14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText('Press E to open Shop', 400, 220);
+    }
+    
+    const distToForge = distance(p.worldX, p.worldY, gameState.town.forgeX, gameState.town.forgeY);
+    if (distToForge < 80) {
+        ctx.fillStyle = 'rgba(255, 20, 147, 0.8)';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Press E to open Radiant Forge', gameState.town.forgeX, 220);
     }
     
     const distToDungeon = distance(p.worldX, p.worldY, gameState.town.dungeonEntranceX, gameState.town.dungeonEntranceY);
@@ -3491,6 +4858,60 @@ function renderDungeon() {
         ctx.fill();
     }
     
+    // Draw Points of Interest
+    for (const poi of gameState.dungeon.pointsOfInterest) {
+        const screenX = poi.x - camX;
+        const screenY = poi.y - camY;
+        
+        // Skip if off screen
+        if (screenX < -50 || screenX > canvas.width + 50 || 
+            screenY < -50 || screenY > canvas.height + 50) continue;
+        
+        // Draw POI with pulsing glow
+        const pulseSize = 35 + Math.sin(Date.now() / 300) * 5;
+        ctx.save();
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = poi.color;
+        
+        // Background glow
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, pulseSize, 0, Math.PI * 2);
+        ctx.fillStyle = poi.color + '30';
+        ctx.fill();
+        
+        // Icon
+        ctx.font = '32px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = poi.color;
+        ctx.fillText(poi.icon, screenX, screenY);
+        
+        // Dim if used
+        if (poi.used && poi.oneTimeUse) {
+            ctx.globalAlpha = 0.3;
+        }
+        
+        ctx.restore();
+        
+        // Name label
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.strokeText(poi.name, screenX, screenY - 40);
+        ctx.fillText(poi.name, screenX, screenY - 40);
+        
+        // Interaction prompt if player is nearby
+        const dist = distance(gameState.player.worldX, gameState.player.worldY, poi.x, poi.y);
+        if (dist < 60) {
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#ffd700';
+            ctx.strokeText('[F] to interact', screenX, screenY - 55);
+            ctx.fillText('[F] to interact', screenX, screenY - 55);
+        }
+    }
+    
     // Draw monsters
     for (const monster of gameState.monsters) {
         const screenX = monster.x - camX;
@@ -3583,168 +5004,176 @@ function renderPlayer(screenX, screenY) {
     // Player shadow
     ctx.beginPath();
     ctx.ellipse(screenX, screenY + p.size - 5, p.size * 0.6, p.size * 0.25, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.fill();
     
     // Animation bounce and walking animation
-    const animBounce = p.isMoving ? Math.sin(p.animFrame * Math.PI / 2) * 3 : 0;
-    const legSwing = p.isMoving ? Math.sin(p.animFrame * Math.PI) * 8 : 0;
-    const armSwing = p.isMoving ? Math.sin(p.animFrame * Math.PI) * 15 : 0;
+    const animBounce = p.isMoving ? Math.sin(p.animFrame * Math.PI / 2) * 2 : 0;
+    const legSwing = p.isMoving ? Math.sin(p.animFrame * Math.PI) * 6 : 0;
+    const armSwing = p.isMoving ? Math.sin(p.animFrame * Math.PI) * 10 : 0;
     
     // Drawing offsets based on direction
     const facingRight = p.direction === 'right';
     const facingLeft = p.direction === 'left';
     const facingUp = p.direction === 'up';
+    const facingDown = p.direction === 'down';
     
     ctx.save();
     ctx.translate(screenX, screenY - animBounce);
     
-    // Colors
-    const skinColor = '#e8beac';
-    const hairColor = '#4a3728';
-    const shirtColor = '#2e78c2';
-    const pantsColor = '#3d3d5a';
-    const bootColor = '#5c3d2e';
+    // Realistic warrior colors
+    const skinColor = '#d4a58a';
+    const hairColor = '#2d1f1a';
+    const armorColor = '#3a3845';
+    const metalColor = '#5a5568';
+    const beltColor = '#4a3020';
+    const capeColor = '#1a1a28';
     
-    // Legs (behind body when facing up)
-    if (facingUp) {
-        // Left leg
-        ctx.fillStyle = pantsColor;
-        ctx.fillRect(-8 + legSwing * 0.3, 5, 6, 16);
-        ctx.fillStyle = bootColor;
-        ctx.fillRect(-8 + legSwing * 0.3, 18, 6, 6);
+    // Cape (behind character)
+    if (!facingDown) {
+        ctx.fillStyle = capeColor;
+        ctx.beginPath();
+        ctx.moveTo(-12, -8);
+        ctx.lineTo(-10, 14);
+        ctx.lineTo(10, 14);
+        ctx.lineTo(12, -8);
+        ctx.closePath();
+        ctx.fill();
         
-        // Right leg
-        ctx.fillStyle = pantsColor;
-        ctx.fillRect(2 - legSwing * 0.3, 5, 6, 16);
-        ctx.fillStyle = bootColor;
-        ctx.fillRect(2 - legSwing * 0.3, 18, 6, 6);
-    } else {
-        // Left leg
-        ctx.fillStyle = pantsColor;
-        ctx.fillRect(-7 + legSwing * 0.3, 5, 6, 16);
-        ctx.fillStyle = bootColor;
-        ctx.fillRect(-7 + legSwing * 0.3, 18, 6, 6);
-        
-        // Right leg
-        ctx.fillStyle = pantsColor;
-        ctx.fillRect(1 - legSwing * 0.3, 5, 6, 16);
-        ctx.fillStyle = bootColor;
-        ctx.fillRect(1 - legSwing * 0.3, 18, 6, 6);
+        // Cape border
+        ctx.strokeStyle = '#2a2a38';
+        ctx.lineWidth = 1;
+        ctx.stroke();
     }
     
-    // Body/Torso (tunic/shirt)
-    ctx.fillStyle = shirtColor;
+    // Legs with armor plates
+    ctx.fillStyle = armorColor;
+    if (facingUp) {
+        // Left leg
+        ctx.fillRect(-8 + legSwing * 0.3, 4, 7, 18);
+        // Right leg  
+        ctx.fillRect(1 - legSwing * 0.3, 4, 7, 18);
+    } else {
+        // Left leg
+        ctx.fillRect(-7 + legSwing * 0.3, 4, 7, 18);
+        // Right leg
+        ctx.fillRect(0 - legSwing * 0.3, 4, 7, 18);
+    }
+    
+    // Boots - metal greaves
+    ctx.fillStyle = metalColor;
+    ctx.fillRect(-8 + (facingUp ? legSwing * 0.3 : legSwing * 0.3), 18, 7, 7);
+    ctx.fillRect((facingUp ? 1 : 0) - (facingUp ? legSwing * 0.3 : legSwing * 0.3), 18, 7, 7);
+    
+    // Body - armored torso
+    ctx.fillStyle = armorColor;
+    ctx.fillRect(-11, -14, 22, 20);
+    
+    // Chest plate detail
+    ctx.fillStyle = metalColor;
+    ctx.fillRect(-10, -13, 20, 3);
+    ctx.fillRect(-9, -9, 18, 2);
+    
+    // Belt with buckle
+    ctx.fillStyle = beltColor;
+    ctx.fillRect(-11, 2, 22, 5);
+    ctx.fillStyle = '#8a7050';
+    ctx.fillRect(-3, 2, 6, 5);
+    
+    // Pauldrons (shoulder armor)
+    ctx.fillStyle = metalColor;
     ctx.beginPath();
-    // Use fillRect as roundRect has limited browser support
-    ctx.fillRect(-10, -12, 20, 20);
+    ctx.arc(-10, -10, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(10, -10, 5, 0, Math.PI * 2);
     ctx.fill();
     
-    // Belt
-    ctx.fillStyle = '#8b6914';
-    ctx.fillRect(-10, 2, 20, 4);
-    
-    // Arms
-    ctx.fillStyle = shirtColor;
+    // Arms with gauntlets
+    ctx.fillStyle = armorColor;
     if (facingLeft) {
         // Left arm (front)
         ctx.save();
-        ctx.translate(-10, -8);
+        ctx.translate(-10, -6);
         ctx.rotate(armSwing * Math.PI / 180);
-        ctx.fillRect(-4, 0, 5, 14);
-        ctx.fillStyle = skinColor;
-        ctx.fillRect(-4, 12, 5, 5);
+        ctx.fillRect(-4, 0, 5, 15);
+        // Gauntlet
+        ctx.fillStyle = metalColor;
+        ctx.fillRect(-4, 11, 5, 6);
         ctx.restore();
         
-        // Right arm (back, partially hidden)
-        ctx.fillStyle = shirtColor;
+        // Right arm (back)
+        ctx.fillStyle = armorColor;
         ctx.save();
-        ctx.translate(10, -8);
+        ctx.translate(10, -6);
         ctx.rotate(-armSwing * Math.PI / 180);
-        ctx.fillRect(-1, 0, 4, 12);
+        ctx.fillRect(-1, 0, 4, 13);
         ctx.restore();
     } else if (facingRight) {
         // Right arm (front)
+        ctx.fillStyle = armorColor;
         ctx.save();
-        ctx.translate(10, -8);
+        ctx.translate(10, -6);
         ctx.rotate(-armSwing * Math.PI / 180);
-        ctx.fillRect(-1, 0, 5, 14);
-        ctx.fillStyle = skinColor;
-        ctx.fillRect(-1, 12, 5, 5);
+        ctx.fillRect(-1, 0, 5, 15);
+        // Gauntlet
+        ctx.fillStyle = metalColor;
+        ctx.fillRect(-1, 11, 5, 6);
         ctx.restore();
         
-        // Left arm (back, partially hidden)
-        ctx.fillStyle = shirtColor;
+        // Left arm (back)
+        ctx.fillStyle = armorColor;
         ctx.save();
-        ctx.translate(-10, -8);
+        ctx.translate(-10, -6);
         ctx.rotate(armSwing * Math.PI / 180);
-        ctx.fillRect(-3, 0, 4, 12);
+        ctx.fillRect(0, 0, 4, 13);
         ctx.restore();
     } else {
-        // Both arms visible (front/back view)
-        // Left arm
-        ctx.save();
-        ctx.translate(-10, -8);
-        ctx.rotate(armSwing * Math.PI / 180);
-        ctx.fillRect(-4, 0, 5, 14);
-        ctx.fillStyle = skinColor;
-        ctx.fillRect(-4, 12, 5, 5);
-        ctx.restore();
-        
-        // Right arm
-        ctx.fillStyle = shirtColor;
-        ctx.save();
-        ctx.translate(10, -8);
-        ctx.rotate(-armSwing * Math.PI / 180);
-        ctx.fillRect(-1, 0, 5, 14);
-        ctx.fillStyle = skinColor;
-        ctx.fillRect(-1, 12, 5, 5);
-        ctx.restore();
+        // Arms at sides or front
+        ctx.fillStyle = armorColor;
+        ctx.fillRect(-13, -4, 5, 15);
+        ctx.fillRect(8, -4, 5, 15);
+        // Gauntlets
+        ctx.fillStyle = metalColor;
+        ctx.fillRect(-13, 9, 5, 6);
+        ctx.fillRect(8, 9, 5, 6);
     }
     
-    // Head
+    // Head with helmet
     ctx.fillStyle = skinColor;
     ctx.beginPath();
-    ctx.arc(0, -20, 10, 0, Math.PI * 2);
+    ctx.arc(0, -20, 9, 0, Math.PI * 2);
     ctx.fill();
     
-    // Hair
-    ctx.fillStyle = hairColor;
-    if (facingUp) {
-        // Back of head hair
-        ctx.beginPath();
-        ctx.arc(0, -20, 10, Math.PI, Math.PI * 2);
-        ctx.fill();
-        ctx.fillRect(-10, -24, 20, 6);
-    } else {
-        // Front hair
-        ctx.beginPath();
-        ctx.ellipse(0, -26, 9, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillRect(-9, -28, 18, 4);
-    }
+    // Helmet - dark iron
+    ctx.fillStyle = metalColor;
+    ctx.beginPath();
+    ctx.arc(0, -23, 9, Math.PI, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(-9, -23, 18, 6);
     
-    // Face (only when not facing up)
-    if (!facingUp) {
-        // Eyes
-        ctx.fillStyle = '#fff';
-        if (facingLeft) {
-            ctx.fillRect(-7, -22, 4, 4);
-            ctx.fillStyle = '#2d4a6e';
-            ctx.fillRect(-6, -21, 2, 2);
-        } else if (facingRight) {
-            ctx.fillRect(3, -22, 4, 4);
-            ctx.fillStyle = '#2d4a6e';
-            ctx.fillRect(5, -21, 2, 2);
-        } else {
-            // Facing down - both eyes
-            ctx.fillRect(-6, -22, 4, 4);
-            ctx.fillRect(2, -22, 4, 4);
-            ctx.fillStyle = '#2d4a6e';
-            ctx.fillRect(-5, -21, 2, 2);
-            ctx.fillRect(3, -21, 2, 2);
-        }
+    // Helmet ridge/crest
+    ctx.fillStyle = '#4a4458';
+    ctx.fillRect(-1, -28, 2, 6);
+    
+    // Face guard/visor slit
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(-7, -19, 14, 3);
+    
+    // Eyes (glowing through visor)
+    ctx.save();
+    ctx.shadowColor = '#4af';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#6cf';
+    if (facingLeft) {
+        ctx.fillRect(-6, -18, 2, 1);
+    } else if (facingRight) {
+        ctx.fillRect(4, -18, 2, 1);
+    } else {
+        ctx.fillRect(-6, -18, 2, 1);
+        ctx.fillRect(4, -18, 2, 1);
     }
+    ctx.restore();
     
     ctx.restore();
     
@@ -3801,8 +5230,9 @@ function renderMinimap() {
     const minimapContainer = document.getElementById('minimap-container');
     if (!minimapCanvas || !minimapContainer) return;
     
-    // Show minimap in dungeon
-    minimapContainer.style.display = 'block';
+    // Show/hide minimap based on state
+    minimapContainer.style.display = gameState.showMinimap ? 'block' : 'none';
+    if (!gameState.showMinimap) return;
     
     const minimapCtx = minimapCanvas.getContext('2d');
     const dungeonWidth = gameState.dungeon.width;
@@ -3887,51 +5317,7 @@ function renderMinimap() {
 }
 
 function renderHUD() {
-    // Location indicator in top-left
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(10, 10, 200, 60);
-    ctx.strokeStyle = '#4a4a6a';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, 200, 60);
-    
-    ctx.font = 'bold 16px Arial';
-    ctx.textAlign = 'left';
-    if (gameState.currentLocation === 'town') {
-        ctx.fillStyle = '#32cd32';
-        ctx.fillText('🏠 Town', 20, 35);
-        ctx.fillStyle = '#888';
-        ctx.font = '12px Arial';
-        ctx.fillText('Safe Zone - Full Regen', 20, 55);
-    } else {
-        const isBossLevel = gameState.dungeonLevel % GAME_CONFIG.bossEveryNLevels === 0;
-        ctx.fillStyle = isBossLevel ? '#ff6b6b' : '#ffc107';
-        ctx.fillText(`⚔️ Dungeon Level ${gameState.dungeonLevel}`, 20, 35);
-        ctx.fillStyle = '#fff';
-        ctx.font = '12px Arial';
-        ctx.fillText(`Enemies: ${gameState.dungeon.enemiesRemaining}/${gameState.dungeon.totalEnemies}`, 20, 55);
-    }
-    
-    // Mini HP bar
-    const hpPercent = gameState.player.hp / gameState.player.maxHp;
-    ctx.fillStyle = '#333';
-    ctx.fillRect(canvas.width - 160, 15, 150, 20);
-    ctx.fillStyle = hpPercent > 0.5 ? '#32cd32' : hpPercent > 0.25 ? '#ffc107' : '#dc3545';
-    ctx.fillRect(canvas.width - 160, 15, 150 * hpPercent, 20);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(canvas.width - 160, 15, 150, 20);
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${Math.floor(gameState.player.hp)}/${gameState.player.maxHp} HP`, canvas.width - 85, 30);
-    
-    // Potion count
-    ctx.fillStyle = '#333';
-    ctx.fillRect(canvas.width - 160, 40, 150, 20);
-    ctx.fillStyle = '#dc3545';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`❤️ Potions: ${gameState.potions.health}/${gameState.potions.maxHealth} [Q]`, canvas.width - 85, 55);
+    // HUD elements removed - now handled by HTML UI panels
 }
 
 let lastTime = 0;
@@ -3955,6 +5341,16 @@ function init() {
     updateEquipmentUI();
     updateUI();
     
+    // Check for existing save data
+    if (hasSaveData()) {
+        // Show load prompt
+        if (confirm('Save data found! Would you like to load your previous game?')) {
+            loadGame();
+            requestAnimationFrame(gameLoop);
+            return;
+        }
+    }
+    
     // Give starting equipment
     const starterSword = generateItem('weapon', 'common', 1);
     starterSword.name = 'Rusty Sword';
@@ -3968,6 +5364,8 @@ function init() {
     addMessage('Welcome to Dark Realms!', 'system');
     addMessage('Use WASD/Arrow keys to move, SPACE to attack', 'system');
     addMessage('Press E to interact, Q to use health potion', 'system');
+    addMessage('Press F to interact with Points of Interest', 'system');
+    addMessage('Press F5 to SAVE, F9 to LOAD your game', 'system');
     addMessage('Visit the SHOP to buy upgrades, enter the DUNGEON for adventure!', 'system');
     
     // Start game loop

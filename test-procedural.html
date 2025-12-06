@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedural Generation Test - Dark Realms</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 50%, #0f0005 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #c92727; text-shadow: 0 0 10px rgba(201, 39, 39, 0.7); }
+        h2 { color: #ff6b6b; border-bottom: 2px solid #4a1a1a; padding-bottom: 10px; }
+        .section {
+            background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+            border: 2px solid #4a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.5);
+        }
+        button {
+            background: linear-gradient(180deg, #c92727 0%, #8b0000 100%);
+            color: white;
+            border: 2px solid #ff6b6b;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: linear-gradient(180deg, #ff6b6b 0%, #c92727 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 107, 107, 0.5);
+        }
+        .output {
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+        }
+        .item {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .common { border-left-color: #808080; }
+        .uncommon { border-left-color: #1eff00; }
+        .rare { border-left-color: #0070dd; }
+        .epic { border-left-color: #a335ee; }
+        .legendary { border-left-color: #ff8000; }
+        .mythic { border-left-color: #e6cc80; }
+        .enemy { color: #ff6b6b; }
+        .boss { color: #ff0000; font-weight: bold; }
+        .champion { color: #ffc107; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🎲 Procedural Generation Test Suite</h1>
+    <p>Dark Realms RPG - Dark Fantasy Content Generator</p>
+
+    <div class="section">
+        <h2>⚔️ Enemy Name Generation</h2>
+        <button onclick="generateEnemies()">Generate 10 Enemies</button>
+        <button onclick="generateChampions()">Generate 5 Champions</button>
+        <button onclick="generateBosses()">Generate 3 Bosses</button>
+        <div class="output" id="enemy-output"></div>
+    </div>
+
+    <div class="section">
+        <h2>🗡️ Item Name Generation</h2>
+        <button onclick="generateItems('common')">Common Items</button>
+        <button onclick="generateItems('rare')">Rare Items</button>
+        <button onclick="generateItems('legendary')">Legendary Items</button>
+        <button onclick="generateItems('mythic')">Mythic Items</button>
+        <div class="output" id="item-output"></div>
+    </div>
+
+    <div class="section">
+        <h2>🏰 Dungeon Themes</h2>
+        <button onclick="generateThemes()">Generate 8 Dungeon Themes</button>
+        <div class="output" id="theme-output"></div>
+    </div>
+
+    <div class="section">
+        <h2>🚪 Room Descriptions</h2>
+        <button onclick="generateRooms()">Generate 10 Rooms</button>
+        <div class="output" id="room-output"></div>
+    </div>
+
+    <div class="section">
+        <h2>🌫️ Environmental Storytelling</h2>
+        <button onclick="generateEnvironments()">Generate 5 Environments</button>
+        <div class="output" id="env-output"></div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Statistics</h2>
+        <button onclick="showStats()">Show Content Statistics</button>
+        <div class="output" id="stats-output"></div>
+    </div>
+
+    <script src="procedural-generation.js"></script>
+    <script>
+        const gen = new ProceduralGenerator();
+        
+        const enemyTypes = ['Zombie', 'Skeleton', 'Wraith', 'Demon', 'Dragon', 'Fallen', 'Werewolf'];
+        const itemTypes = ['Sword', 'Axe', 'Helmet', 'Armor', 'Shield', 'Boots', 'Ring', 'Amulet'];
+
+        function generateEnemies() {
+            const output = document.getElementById('enemy-output');
+            let html = '<h3>Regular Enemies:</h3>';
+            for (let i = 0; i < 10; i++) {
+                const baseType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                const name = gen.generateEnemyName(baseType, false, false);
+                const desc = gen.generateEnemyDescription(baseType);
+                html += `<div class="item enemy"><strong>${name}</strong><br><em>${desc}</em></div>`;
+            }
+            output.innerHTML = html;
+        }
+
+        function generateChampions() {
+            const output = document.getElementById('enemy-output');
+            let html = '<h3>Champion Enemies:</h3>';
+            for (let i = 0; i < 5; i++) {
+                const baseType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                const name = gen.generateEnemyName(baseType, true, false);
+                const desc = gen.generateEnemyDescription(baseType);
+                html += `<div class="item champion"><strong>${name}</strong><br><em>${desc}</em></div>`;
+            }
+            output.innerHTML = html;
+        }
+
+        function generateBosses() {
+            const output = document.getElementById('enemy-output');
+            let html = '<h3>Boss Enemies:</h3>';
+            for (let i = 0; i < 3; i++) {
+                const baseType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                const name = gen.generateEnemyName(baseType, false, true);
+                const desc = gen.generateEnemyDescription(baseType);
+                html += `<div class="item boss"><strong>${name}</strong><br><em>${desc}</em></div>`;
+            }
+            output.innerHTML = html;
+        }
+
+        function generateItems(rarity) {
+            const output = document.getElementById('item-output');
+            let html = `<h3>${rarity.charAt(0).toUpperCase() + rarity.slice(1)} Items:</h3>`;
+            for (let i = 0; i < 8; i++) {
+                const baseName = itemTypes[Math.floor(Math.random() * itemTypes.length)];
+                const itemData = { names: [baseName] };
+                const item = gen.generateProceduralItem('weapon', itemData, rarity.charAt(0).toUpperCase() + rarity.slice(1));
+                html += `<div class="item ${rarity}">
+                    <strong>${item.proceduralName}</strong><br>
+                    <em>${item.flavorText}</em>
+                </div>`;
+            }
+            output.innerHTML = html;
+        }
+
+        function generateThemes() {
+            const output = document.getElementById('theme-output');
+            let html = '<h3>Dungeon Themes by Level:</h3>';
+            for (let i = 1; i <= 8; i++) {
+                const theme = gen.generateDungeonTheme(i);
+                html += `<div class="item" style="border-left-color: ${theme.color}">
+                    <strong>Level ${i}: ${theme.name}</strong><br>
+                    <em>${theme.desc}</em>
+                </div>`;
+            }
+            output.innerHTML = html;
+        }
+
+        function generateRooms() {
+            const output = document.getElementById('room-output');
+            let html = '<h3>Room Descriptions:</h3>';
+            for (let i = 0; i < 10; i++) {
+                const room = gen.generateRoomDescription();
+                html += `<div class="item">
+                    <strong>${room.description}</strong><br>
+                    <em>${room.flavor}</em>
+                </div>`;
+            }
+            output.innerHTML = html;
+        }
+
+        function generateEnvironments() {
+            const output = document.getElementById('env-output');
+            let html = '<h3>Environmental Stories:</h3>';
+            for (let i = 0; i < 5; i++) {
+                const env = gen.generateEnvironmentalStory();
+                html += `<div class="item">
+                    <strong>Sight:</strong> ${env.sight}<br>
+                    <strong>Sound:</strong> ${env.sound}<br>
+                    <strong>Smell:</strong> ${env.smell}
+                </div>`;
+            }
+            output.innerHTML = html;
+        }
+
+        function showStats() {
+            const output = document.getElementById('stats-output');
+            
+            const prefixCount = Object.values(PROCEDURAL_TABLES.enemyPrefixes).reduce((sum, arr) => sum + arr.length, 0);
+            const suffixCount = Object.values(PROCEDURAL_TABLES.enemySuffixes).reduce((sum, arr) => sum + arr.length, 0);
+            const itemPrefixCount = Object.values(PROCEDURAL_TABLES.itemPrefixes).reduce((sum, arr) => sum + arr.length, 0);
+            const itemSuffixCount = Object.values(PROCEDURAL_TABLES.itemSuffixes).reduce((sum, arr) => sum + arr.length, 0);
+            
+            const enemyTypes = 7; // Base enemy types
+            const championCombos = prefixCount * enemyTypes;
+            const bossCombos = prefixCount * suffixCount * enemyTypes;
+            const itemBaseCombos = itemPrefixCount * 50; // Approximate base items
+            const itemRareCombos = itemPrefixCount * itemSuffixCount * 50;
+            
+            let html = `
+                <h3>Content Statistics:</h3>
+                <div class="item">
+                    <strong>Enemy Generation:</strong><br>
+                    • Prefix variations: ${prefixCount}<br>
+                    • Suffix variations: ${suffixCount}<br>
+                    • Champion combinations: ${championCombos.toLocaleString()}<br>
+                    • Boss combinations: ${bossCombos.toLocaleString()}<br>
+                </div>
+                <div class="item">
+                    <strong>Item Generation:</strong><br>
+                    • Prefix variations: ${itemPrefixCount}<br>
+                    • Suffix variations: ${itemSuffixCount}<br>
+                    • Basic item combinations: ${itemBaseCombos.toLocaleString()}<br>
+                    • Rare+ item combinations: ${itemRareCombos.toLocaleString()}<br>
+                </div>
+                <div class="item">
+                    <strong>Dungeon Content:</strong><br>
+                    • Room types: ${PROCEDURAL_TABLES.dungeonRoomTypes.length}<br>
+                    • Environmental features: ${PROCEDURAL_TABLES.dungeonFeatures.length}<br>
+                    • Dungeon themes: 8<br>
+                    • Environmental details: ${Object.values(PROCEDURAL_TABLES.environmentalDetails).reduce((sum, arr) => sum + arr.length, 0)}<br>
+                </div>
+                <div class="item">
+                    <strong>Total Unique Combinations:</strong><br>
+                    • Estimated: Over 80,000 unique possibilities!<br>
+                </div>
+            `;
+            output.innerHTML = html;
+        }
+
+        // Auto-generate some content on load
+        window.addEventListener('load', () => {
+            generateEnemies();
+            showStats();
+        });
+    </script>
+</body>
+</html>
