@@ -63,7 +63,7 @@ const ITEM_TYPES = {
     },
     boots: {
         slot: 'boots',
-        baseStats: { defense: 3, speed: 1.5 }, // Speed increased from 0.3 to 1.5 to balance with new speed bonus system (1-5 for rare, 5-10 for epic+)
+        baseStats: { defense: 3, speed: 1.5 }, // Base speed increased to 1.5 to work with new configurable speed bonus system (see SPEED_BONUS_CONFIG)
         icon: '👢',
         names: ['Boots', 'Greaves', 'Sandals', 'Treads', 'Sabatons', 'Shoes']
     },
@@ -887,9 +887,9 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
     
     const stats = {};
     for (const [stat, value] of Object.entries(itemType.baseStats)) {
-        // Speed stats should not be scaled by rarity/level - keep them small
+        // Speed stats use base value only (not scaled by rarity) to prevent excessive values
         if (stat === 'speed') {
-            stats[stat] = value; // Use base value only for speed
+            stats[stat] = value; // Use base value only, bonuses added separately below
         } else {
             stats[stat] = Math.floor(value * rarityData.statMultiplier * levelScale * randomFloat(0.8, 1.2));
         }
