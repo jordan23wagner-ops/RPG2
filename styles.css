@@ -404,10 +404,24 @@ h2, h3 {
 .inventory-slot:hover {
     border-color: #6a6a8a;
     background: linear-gradient(135deg, #252540 0%, #353560 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .inventory-slot.has-item {
     border-color: #4a4a6a;
+}
+
+/* Improved hover for items */
+.inventory-slot.has-item:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+}
+
+.inventory-slot.has-item:active {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Rarity Colors */

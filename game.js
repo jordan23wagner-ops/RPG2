@@ -3945,6 +3945,14 @@ function updateUI() {
     updateEquipmentUI();
 }
 
+// ============================================
+// BACKPACK/INVENTORY SYSTEM (REWRITTEN)
+// ============================================
+
+/**
+ * Renders all inventory slots and updates the UI
+ * Uses cleaner implementation with better event handling
+ */
 function updateInventoryUI() {
     const grid = document.getElementById('inventory-grid');
     if (!grid) {
@@ -3952,33 +3960,62 @@ function updateInventoryUI() {
         return;
     }
     
+    // Clear existing content
     grid.innerHTML = '';
 
+    // Create all inventory slots
     for (let i = 0; i < gameState.maxInventory; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'inventory-slot';
-        slot.dataset.index = i;
-
-        const item = gameState.inventory[i];
-        if (item) {
-            slot.classList.add('has-item', `rarity-${item.rarity}`);
-            slot.textContent = item.icon;
-
-            // Minimal listeners: tooltip on hover, click to handle
-            slot.addEventListener('mouseenter', (e) => showTooltip(item, e));
-            slot.addEventListener('mouseleave', hideTooltip);
-            slot.addEventListener('click', () => handleInventoryClick(i));
-        }
-
+        const slot = createInventorySlot(i);
         grid.appendChild(slot);
     }
 
-    const itemCount = gameState.inventory.filter(item => item !== null).length;
-    const countEl = document.getElementById('inventory-count');
-    if (countEl) countEl.textContent = `(${itemCount}/${gameState.maxInventory})`;
-
+    // Update inventory count display
+    updateInventoryCount();
+    
     // Update materials count
     updateMaterialsUI();
+}
+
+/**
+ * Creates a single inventory slot with proper event handlers
+ * @param {number} index - The inventory slot index
+ * @returns {HTMLElement} The created slot element
+ */
+function createInventorySlot(index) {
+    const slot = document.createElement('div');
+    slot.className = 'inventory-slot';
+    slot.dataset.index = index;
+    slot.setAttribute('role', 'button');
+    slot.setAttribute('tabindex', '0');
+
+    const item = gameState.inventory[index];
+    
+    if (item) {
+        // Slot has an item - configure it
+        slot.classList.add('has-item', `rarity-${item.rarity}`);
+        slot.textContent = item.icon;
+        slot.setAttribute('aria-label', `${item.name} - Click to equip`);
+        
+        // Store item data on the element for easy access
+        slot.dataset.itemType = item.type;
+        slot.dataset.itemName = item.name;
+    } else {
+        // Empty slot
+        slot.setAttribute('aria-label', 'Empty inventory slot');
+    }
+
+    return slot;
+}
+
+/**
+ * Updates the inventory count display
+ */
+function updateInventoryCount() {
+    const itemCount = gameState.inventory.filter(item => item !== null).length;
+    const countEl = document.getElementById('inventory-count');
+    if (countEl) {
+        countEl.textContent = `(${itemCount}/${gameState.maxInventory})`;
+    }
 }
 
 function updateMaterialsUI() {
@@ -4058,11 +4095,22 @@ function updateEquipmentUI() {
     }
 }
 
+/**
+ * Handle clicking on an inventory item
+ * @param {number} index - The inventory slot index that was clicked
+ */
 function handleInventoryClick(index) {
     const item = gameState.inventory[index];
-    if (!item) return;
+    
+    // Safety check
+    if (!item) {
+        console.warn(`handleInventoryClick called on empty slot ${index}`);
+        return;
+    }
 
+    // Handle potions differently from equipment
     if (item.type === 'potion') {
+        // Try to move potion to potion inventory
         if (gameState.potions.health < gameState.potions.maxHealth) {
             gameState.potions.health++;
             removeFromInventory(index);
@@ -4072,7 +4120,8 @@ function handleInventoryClick(index) {
             addMessage('Potion inventory full!', 'system');
         }
     } else {
-        console.log('handleInventoryClick triggered for slot', index, 'item', item && item.name);
+        // Equipment item - equip it
+        console.log(`Equipping item from slot ${index}:`, item.name, `(${item.type})`);
         equipItem(item, index);
     }
 }
@@ -4086,6 +4135,90 @@ document.querySelectorAll('.equipment-slot').forEach(slot => {
         }
     });
 });
+
+// ============================================
+// INVENTORY EVENT DELEGATION (REWRITTEN)
+// ============================================
+
+/**
+ * Set up event delegation for inventory interactions
+ * This is more robust than adding individual listeners to each slot
+ */
+function setupInventoryEventHandlers() {
+    const inventoryGrid = document.getElementById('inventory-grid');
+    
+    if (!inventoryGrid) {
+        console.error('Could not find inventory-grid for event delegation');
+        return;
+    }
+    
+    // Use event delegation - single listener on the grid instead of each slot
+    inventoryGrid.addEventListener('click', handleInventoryGridClick);
+    // Use capture phase for mouse events to handle tooltips on child elements
+    inventoryGrid.addEventListener('mouseenter', handleInventoryGridMouseEnter, true);
+    inventoryGrid.addEventListener('mouseleave', handleInventoryGridMouseLeave, true);
+}
+
+/**
+ * Handle clicks anywhere in the inventory grid (event delegation)
+ * @param {MouseEvent} event - The click event
+ */
+function handleInventoryGridClick(event) {
+    const slot = event.target.closest('.inventory-slot');
+    
+    if (!slot) return; // Click was not on a slot
+    
+    const index = parseInt(slot.dataset.index, 10);
+    
+    if (isNaN(index)) {
+        console.error('Invalid inventory slot index');
+        return;
+    }
+    
+    // Only process if slot has an item
+    if (slot.classList.contains('has-item')) {
+        handleInventoryClick(index);
+    }
+}
+
+/**
+ * Handle mouse enter events for tooltips (event delegation)
+ * @param {MouseEvent} event - The mouseenter event
+ */
+function handleInventoryGridMouseEnter(event) {
+    const slot = event.target.closest('.inventory-slot');
+    
+    if (!slot || !slot.classList.contains('has-item')) return;
+    
+    const index = parseInt(slot.dataset.index, 10);
+    const item = gameState.inventory[index];
+    
+    if (item) {
+        showTooltip(item, event);
+    }
+}
+
+/**
+ * Handle mouse leave events for tooltips (event delegation)
+ * @param {MouseEvent} event - The mouseleave event
+ */
+function handleInventoryGridMouseLeave(event) {
+    const slot = event.target.closest('.inventory-slot');
+    
+    if (!slot) return;
+    
+    hideTooltip();
+}
+
+// Initialize inventory event handlers when DOM is ready
+// Note: Scripts are loaded at end of body, so DOM should already be ready,
+// but we check to be safe
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupInventoryEventHandlers);
+} else {
+    // DOM is already ready
+    setupInventoryEventHandlers();
+}
 
 // ============================================
 // TOOLTIP SYSTEM
