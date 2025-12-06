@@ -455,7 +455,8 @@ const gameState = {
         enemiesRemaining: 0,
         totalEnemies: 0,
         bossSpawned: false,
-        bossDefeated: false
+        bossDefeated: false,
+        highestLevelReached: 1
     },
     town: {
         shopOpen: false,
@@ -710,6 +711,11 @@ function enterDungeon(level) {
     gameState.dungeon.bossDefeated = false;
     gameState.loot = [];
     
+    // Track highest level reached
+    if (level > gameState.dungeon.highestLevelReached) {
+        gameState.dungeon.highestLevelReached = level;
+    }
+    
     // Generate new dungeon
     const dungeonInfo = generateDungeon(level);
     
@@ -799,10 +805,12 @@ function buyPotion() {
 
 function updateShopUI() {
     const shopPanel = document.getElementById('shop-panel');
+    const shopBackdrop = document.getElementById('shop-backdrop');
     if (!shopPanel) return;
     
     if (gameState.showShop && gameState.currentLocation === 'town') {
         shopPanel.style.display = 'block';
+        if (shopBackdrop) shopBackdrop.style.display = 'block';
         
         // Update upgrade buttons
         for (const [key, upgrade] of Object.entries(SHOP_UPGRADES)) {
@@ -817,6 +825,7 @@ function updateShopUI() {
         }
     } else {
         shopPanel.style.display = 'none';
+        if (shopBackdrop) shopBackdrop.style.display = 'none';
     }
 }
 
@@ -1331,7 +1340,8 @@ function handleInteraction() {
         // Check if near dungeon entrance
         const distToDungeon = distance(p.worldX, p.worldY, gameState.town.dungeonEntranceX, gameState.town.dungeonEntranceY);
         if (distToDungeon < 60) {
-            enterDungeon(1);
+            // Continue from current dungeon level (enemies respawn)
+            enterDungeon(gameState.dungeonLevel);
             return;
         }
         
