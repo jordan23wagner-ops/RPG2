@@ -874,10 +874,12 @@ function generateItem(forcedType = null, forcedRarity = null, dungeonLevel = 1) 
         for (let i = 0; i < numBonuses; i++) {
             const bonusStat = randomChoice(bonusStats);
             // Speed bonuses are much smaller to keep movement balanced
-            const baseBonus = bonusStat === 'speed' ? randomFloat(0.1, 0.5) : randomRange(3, 10);
-            const bonusValue = bonusStat === 'speed' 
-                ? Math.round(baseBonus * rarityData.statMultiplier * levelScale * 10) / 10
-                : Math.floor(baseBonus * rarityData.statMultiplier * levelScale);
+            const isSpeedStat = bonusStat === 'speed';
+            const baseBonus = isSpeedStat ? randomFloat(0.1, 0.5) : randomRange(3, 10);
+            const scaledBonus = baseBonus * rarityData.statMultiplier * levelScale;
+            const bonusValue = isSpeedStat 
+                ? Math.round(scaledBonus * 10) / 10  // Round to 1 decimal for speed
+                : Math.floor(scaledBonus);
             stats[bonusStat] = (stats[bonusStat] || 0) + bonusValue;
         }
     }
@@ -1275,6 +1277,9 @@ function updateParticles() {
 // ============================================
 
 // Helper function to draw a scary smile
+// Number of teeth to draw in scary smiles
+const SCARY_SMILE_TEETH_COUNT = 5;
+
 function drawScarySmile(ctx, size, yOffset, smileWidth = 0.2, smileColor = '#ff0000') {
     ctx.save();
     // Draw evil smile curve
@@ -1285,9 +1290,8 @@ function drawScarySmile(ctx, size, yOffset, smileWidth = 0.2, smileColor = '#ff0
     ctx.stroke();
     // Draw teeth
     ctx.fillStyle = '#ffffff';
-    const teethCount = 5;
-    const teethWidth = size * smileWidth * 2 / teethCount;
-    for (let i = 0; i < teethCount; i++) {
+    const teethWidth = size * smileWidth * 2 / SCARY_SMILE_TEETH_COUNT;
+    for (let i = 0; i < SCARY_SMILE_TEETH_COUNT; i++) {
         if (i % 2 === 0) {
             ctx.beginPath();
             ctx.moveTo(-size * smileWidth + i * teethWidth + teethWidth * 0.2, yOffset - size * 0.02);
