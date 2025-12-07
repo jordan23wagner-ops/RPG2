@@ -3964,7 +3964,8 @@ function updateInventoryUI() {
         const item = gameState.inventory[i];
         if (item) {
             slot.classList.add('has-item', `rarity-${item.rarity}`);
-            slot.textContent = item.icon;
+            // Use innerHTML instead of textContent to ensure click target is always the slot div
+            slot.innerHTML = `<span class="item-icon-text">${item.icon}</span>`;
             // NOTE: click handling uses delegation registered in window.load listener
             // Tooltips disabled for QA - no event listeners added to individual slots
         }

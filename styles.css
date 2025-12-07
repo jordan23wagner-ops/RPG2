@@ -410,6 +410,12 @@ h2, h3 {
     border-color: #4a4a6a;
 }
 
+/* Ensure icon text doesn't block clicks */
+.item-icon-text {
+    pointer-events: none;
+    user-select: none;
+}
+
 /* Rarity Colors */
 .inventory-slot.rarity-common { border-color: #808080; }
 .inventory-slot.rarity-uncommon { border-color: #1eff00; }
