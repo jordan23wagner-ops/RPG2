@@ -1001,6 +1001,8 @@ const gameState = {
         x: 0,
         y: 0
     },
+    // UI toggles (for QA/dev)
+    showTooltips: false,
     gameTime: 0,
     regenTimer: 0,
     isPaused: false,
@@ -4074,6 +4076,8 @@ function handleInventoryClick(index) {
 // ============================================
 
 function showTooltip(item, event) {
+    // Respect the QA/dev toggle for tooltips
+    if (gameState && gameState.showTooltips === false) return;
     const tooltip = document.getElementById('item-tooltip');
     const nameEl = document.getElementById('tooltip-name');
     const typeEl = document.getElementById('tooltip-type');
@@ -4226,6 +4230,7 @@ function showTooltip(item, event) {
 }
 
 function hideTooltip() {
+    if (gameState && gameState.showTooltips === false) return;
     const tooltip = document.getElementById('item-tooltip');
     if (tooltip) tooltip.style.display = 'none';
 }
