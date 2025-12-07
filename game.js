@@ -5376,14 +5376,32 @@ window.addEventListener('load', () => {
         console.log('[INIT] inventory-grid found, attaching delegated click handler');
         inventoryGridEl.addEventListener('click', (e) => {
             console.log('[CLICK] inventory-grid clicked, target:', e.target);
-            const slotEl = e.target.closest('.inventory-slot');
-            console.log('[CLICK] closest .inventory-slot:', slotEl);
-            if (!slotEl) return;
+            console.log('[CLICK] target tagName:', e.target.tagName);
+            console.log('[CLICK] target className:', e.target.className);
+            console.log('[CLICK] target parentElement:', e.target.parentElement);
+            
+            // Try to find the slot - either the target itself or a parent
+            let slotEl = null;
+            if (e.target.classList.contains('inventory-slot')) {
+                slotEl = e.target;
+            } else if (e.target.parentElement && e.target.parentElement.classList.contains('inventory-slot')) {
+                slotEl = e.target.parentElement;
+            } else {
+                slotEl = e.target.closest('.inventory-slot');
+            }
+            
+            console.log('[CLICK] found .inventory-slot:', slotEl);
+            if (!slotEl) {
+                console.warn('[CLICK] No inventory slot found - click may be on grid padding/gap');
+                return;
+            }
             const index = parseInt(slotEl.dataset.index);
             console.log('[CLICK] Inventory slot index:', index);
             if (!Number.isNaN(index)) {
                 console.log('[CLICK] Calling handleInventoryClick for index:', index);
                 handleInventoryClick(index);
+            } else {
+                console.error('[CLICK] Slot found but no valid data-index:', slotEl);
             }
         });
     } else {
