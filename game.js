@@ -3965,12 +3965,8 @@ function updateInventoryUI() {
         if (item) {
             slot.classList.add('has-item', `rarity-${item.rarity}`);
             slot.textContent = item.icon;
-
-            // Minimal listeners: tooltip on hover
-            slot.addEventListener('mouseenter', (e) => showTooltip(item, e));
-            slot.addEventListener('mouseleave', hideTooltip);
-            // NOTE: click handling uses delegation to ensure handlers are consistent even
-            // when DOM is re-created during updates. Avoid direct click listeners here.
+            // NOTE: click handling uses delegation registered in window.load listener
+            // Tooltips disabled for QA - no event listeners added to individual slots
         }
 
         grid.appendChild(slot);
@@ -5372,31 +5368,42 @@ init();
 
 // Attach delegated click handlers after init() has created the UI
 window.addEventListener('load', () => {
+    console.log('[INIT] Registering delegated click handlers for inventory and equipment');
+    
     const inventoryGridEl = document.getElementById('inventory-grid');
     if (inventoryGridEl) {
+        console.log('[INIT] inventory-grid found, attaching delegated click handler');
         inventoryGridEl.addEventListener('click', (e) => {
+            console.log('[CLICK] inventory-grid clicked, target:', e.target);
             const slotEl = e.target.closest('.inventory-slot');
+            console.log('[CLICK] closest .inventory-slot:', slotEl);
             if (!slotEl) return;
             const index = parseInt(slotEl.dataset.index);
+            console.log('[CLICK] Inventory slot index:', index);
             if (!Number.isNaN(index)) {
-                console.log('Inventory slot clicked (delegated):', index);
+                console.log('[CLICK] Calling handleInventoryClick for index:', index);
                 handleInventoryClick(index);
             }
         });
+    } else {
+        console.error('[INIT] inventory-grid NOT found in DOM!');
     }
 
     const equipmentGridEl = document.querySelector('.equipment-grid');
     if (equipmentGridEl) {
+        console.log('[INIT] equipment-grid found, attaching delegated click handler');
         equipmentGridEl.addEventListener('click', (e) => {
             const slotEl = e.target.closest('.equipment-slot');
             if (!slotEl) return;
             const slotName = slotEl.dataset.slot;
             if (slotName) {
-                console.log('Equipment slot clicked (delegated):', slotName);
+                console.log('[CLICK] Equipment slot clicked:', slotName);
                 if (gameState.player.equipment[slotName]) {
                     unequipItem(slotName);
                 }
             }
         });
+    } else {
+        console.error('[INIT] equipment-grid NOT found in DOM!');
     }
 });
