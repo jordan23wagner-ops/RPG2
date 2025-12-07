@@ -4230,7 +4230,6 @@ function showTooltip(item, event) {
 }
 
 function hideTooltip() {
-    if (gameState && gameState.showTooltips === false) return;
     const tooltip = document.getElementById('item-tooltip');
     if (tooltip) tooltip.style.display = 'none';
 }
@@ -5362,6 +5361,9 @@ function init() {
     if (gameState && gameState.showTooltips === false) {
         console.log('QA: Tooltips disabled');
         addMessage('Tooltips disabled for QA', 'system');
+        // Ensure any visible tooltip is hidden immediately
+        const tooltip = document.getElementById('item-tooltip');
+        if (tooltip) tooltip.style.display = 'none';
     }
 }
 
