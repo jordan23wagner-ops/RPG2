@@ -1001,6 +1001,8 @@ const gameState = {
         x: 0,
         y: 0
     },
+    // UI toggles (for QA/dev)
+    showTooltips: false,
     gameTime: 0,
     regenTimer: 0,
     isPaused: false,
@@ -3962,31 +3964,34 @@ function updateInventoryUI() {
         const item = gameState.inventory[i];
         if (item) {
             slot.classList.add('has-item', `rarity-${item.rarity}`);
-            slot.textContent = item.icon;
-
-            // Minimal listeners: tooltip on hover, click to handle
-            slot.addEventListener('mouseenter', (e) => showTooltip(item, e));
-            slot.addEventListener('mouseleave', hideTooltip);
-            slot.addEventListener('click', () => handleInventoryClick(i));
+            // Use innerHTML instead of textContent to ensure click target is always the slot div
+            slot.innerHTML = `<span class="item-icon-text">${item.icon}</span>`;
+            // NOTE: click handling uses delegation registered in window.load listener
+            // Tooltips disabled for QA - no event listeners added to individual slots
         }
 
         grid.appendChild(slot);
     }
+    
+    console.log('[INVENTORY] Updated inventory UI - grid children count:', grid.children.length);
+    console.log('[INVENTORY] First slot element:', grid.children[0]);
 
     const itemCount = gameState.inventory.filter(item => item !== null).length;
     const countEl = document.getElementById('inventory-count');
     if (countEl) countEl.textContent = `(${itemCount}/${gameState.maxInventory})`;
 
-    // Update materials count
-    updateMaterialsUI();
+    // materials UI removed temporarily
 }
+
+// NOTE: Event delegation is registered in init() once the DOM is ready in order
+// to ensure elements exist and avoid duplicate listeners on re-renders.
 
 function updateMaterialsUI() {
     const grid = document.getElementById('materials-backpack-grid');
-    const materialCount = Object.keys(gameState.craftingMaterials).length;
-    document.getElementById('materials-count').textContent = `(${materialCount})`;
-    
-    if (!grid) return;
+    const countEl = document.getElementById('materials-count');
+    const materialCount = Object.keys(gameState.craftingMaterials || {}).length;
+    if (countEl) countEl.textContent = `(${materialCount})`;
+    if (!grid) return; // no UI present, nothing to render
     
     grid.innerHTML = '';
     const materialEntries = Object.entries(gameState.craftingMaterials);
@@ -4012,22 +4017,9 @@ function updateMaterialsUI() {
 }
 
 function switchInventoryTab(tab) {
+    // Materials tab removed; default to items only. No-op for tab switching.
     const itemsTab = document.getElementById('inventory-items-tab');
-    const materialsTab = document.getElementById('inventory-materials-tab');
-    const tabs = document.querySelectorAll('.inventory-tab');
-    
-    tabs.forEach(t => t.classList.remove('active'));
-    
-    if (tab === 'items') {
-        itemsTab.style.display = 'block';
-        materialsTab.style.display = 'none';
-        tabs[0].classList.add('active');
-    } else {
-        itemsTab.style.display = 'none';
-        materialsTab.style.display = 'block';
-        tabs[1].classList.add('active');
-        updateMaterialsUI(); // Refresh materials when switching to tab
-    }
+    if (itemsTab) itemsTab.style.display = 'block';
 }
 
 function updateEquipmentUI() {
@@ -4077,21 +4069,15 @@ function handleInventoryClick(index) {
     }
 }
 
-// Setup equipment slot clicks
-document.querySelectorAll('.equipment-slot').forEach(slot => {
-    slot.addEventListener('click', () => {
-        const slotName = slot.dataset.slot;
-        if (gameState.player.equipment[slotName]) {
-            unequipItem(slotName);
-        }
-    });
-});
+// Equipment slot clicks are handled via event delegation (registered on load)
 
 // ============================================
 // TOOLTIP SYSTEM
 // ============================================
 
 function showTooltip(item, event) {
+    // Respect the QA/dev toggle for tooltips
+    if (gameState && gameState.showTooltips === false) return;
     const tooltip = document.getElementById('item-tooltip');
     const nameEl = document.getElementById('tooltip-name');
     const typeEl = document.getElementById('tooltip-type');
@@ -5370,7 +5356,76 @@ function init() {
     
     // Start game loop
     requestAnimationFrame(gameLoop);
+
+    // Developer QA: log if tooltips are disabled
+    if (gameState && gameState.showTooltips === false) {
+        console.log('QA: Tooltips disabled');
+        addMessage('Tooltips disabled for QA', 'system');
+        // Ensure any visible tooltip is hidden immediately
+        const tooltip = document.getElementById('item-tooltip');
+        if (tooltip) tooltip.style.display = 'none';
+    }
 }
 
 // Start the game
 init();
+
+// Attach delegated click handlers after init() has created the UI
+window.addEventListener('load', () => {
+    console.log('[INIT] Registering delegated click handlers for inventory and equipment');
+    
+    const inventoryGridEl = document.getElementById('inventory-grid');
+    if (inventoryGridEl) {
+        console.log('[INIT] inventory-grid found, attaching delegated click handler');
+        inventoryGridEl.addEventListener('click', (e) => {
+            console.log('[CLICK] inventory-grid clicked, target:', e.target);
+            console.log('[CLICK] target tagName:', e.target.tagName);
+            console.log('[CLICK] target className:', e.target.className);
+            console.log('[CLICK] target parentElement:', e.target.parentElement);
+            
+            // Try to find the slot - either the target itself or a parent
+            let slotEl = null;
+            if (e.target.classList.contains('inventory-slot')) {
+                slotEl = e.target;
+            } else if (e.target.parentElement && e.target.parentElement.classList.contains('inventory-slot')) {
+                slotEl = e.target.parentElement;
+            } else {
+                slotEl = e.target.closest('.inventory-slot');
+            }
+            
+            console.log('[CLICK] found .inventory-slot:', slotEl);
+            if (!slotEl) {
+                console.warn('[CLICK] No inventory slot found - click may be on grid padding/gap');
+                return;
+            }
+            const index = parseInt(slotEl.dataset.index);
+            console.log('[CLICK] Inventory slot index:', index);
+            if (!Number.isNaN(index)) {
+                console.log('[CLICK] Calling handleInventoryClick for index:', index);
+                handleInventoryClick(index);
+            } else {
+                console.error('[CLICK] Slot found but no valid data-index:', slotEl);
+            }
+        });
+    } else {
+        console.error('[INIT] inventory-grid NOT found in DOM!');
+    }
+
+    const equipmentGridEl = document.querySelector('.equipment-grid');
+    if (equipmentGridEl) {
+        console.log('[INIT] equipment-grid found, attaching delegated click handler');
+        equipmentGridEl.addEventListener('click', (e) => {
+            const slotEl = e.target.closest('.equipment-slot');
+            if (!slotEl) return;
+            const slotName = slotEl.dataset.slot;
+            if (slotName) {
+                console.log('[CLICK] Equipment slot clicked:', slotName);
+                if (gameState.player.equipment[slotName]) {
+                    unequipItem(slotName);
+                }
+            }
+        });
+    } else {
+        console.error('[INIT] equipment-grid NOT found in DOM!');
+    }
+});
