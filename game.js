@@ -3972,6 +3972,9 @@ function updateInventoryUI() {
 
         grid.appendChild(slot);
     }
+    
+    console.log('[INVENTORY] Updated inventory UI - grid children count:', grid.children.length);
+    console.log('[INVENTORY] First slot element:', grid.children[0]);
 
     const itemCount = gameState.inventory.filter(item => item !== null).length;
     const countEl = document.getElementById('inventory-count');
