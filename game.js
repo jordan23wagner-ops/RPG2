@@ -5357,6 +5357,12 @@ function init() {
     
     // Start game loop
     requestAnimationFrame(gameLoop);
+
+    // Developer QA: log if tooltips are disabled
+    if (gameState && gameState.showTooltips === false) {
+        console.log('QA: Tooltips disabled');
+        addMessage('Tooltips disabled for QA', 'system');
+    }
 }
 
 // Start the game
